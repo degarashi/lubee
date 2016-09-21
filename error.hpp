@@ -47,7 +47,7 @@ namespace lubee {
 		return s
 			<< "at file:\t" << p.filename << endl
 			<< "at function:\t" << p.funcname << endl
-			<< "on line:\t" << p.line << endl;
+			<< "on line:\t" << p.line;
 	}
 	namespace err {
 		struct AssertionFailed : std::runtime_error {
