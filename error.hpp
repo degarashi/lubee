@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cstdio>
 #include <stdexcept>
+#include <sstream>
 
 #define SOURCEPOS ::lubee::SourcePos{__FILE__, __PRETTY_FUNCTION__, __func__, __LINE__}
 #define AssertBase(typ, exp, ...) \
@@ -87,4 +88,114 @@ namespace lubee {
 		return ret;
 	}
 	#pragma GCC diagnostic pop
+
+	//! lubeeのアサートマクロが失敗した際に投げられる
+	class AssertionFailed : public std::runtime_error {
+		private:
+			SourcePos				_pos;
+			int						_lineTo;
+			mutable std::string		_buff;
+		public:
+			AssertionFailed(const char* msg, const SourcePos& posAt):
+				std::runtime_error(msg),
+				_pos(posAt),
+				_lineTo(0)
+			{}
+			AssertionFailed(const char* msg, const SourcePos& posFrom, const SourcePos& posTo):
+				std::runtime_error(msg),
+				_pos(posFrom),
+				_lineTo(posTo.line)
+			{}
+			const char* what() const noexcept override {
+				try {
+					std::stringstream ss;
+					ss << std::runtime_error::what() << std::endl;
+					ss << _pos;
+					if(_lineTo > 0)
+						ss << " to " << _lineTo;
+					ss << std::endl;
+					_buff = ss.str();
+					return _buff.c_str();
+				} catch(...) {
+					return "(error while exception handling)";
+				}
+			}
+	};
+	template <class T=void>
+	struct ScopeHolder {
+		struct Scope {
+			const char*	name;
+			SourcePos	pos;
+		};
+		thread_local static Scope tls_scope;
+	};
+	template <class T=void>
+	constexpr SourcePos TopLevelSPos{"[no filename]", "[no function]", "[no function]", 0};
+	template <class T>
+	thread_local typename ScopeHolder<T>::Scope ScopeHolder<T>::tls_scope{"[top level]", TopLevelSPos<>};
+
+	inline void PrintException(std::ostream& os, const int indent=0) {
+		os << std::string(indent*4, ' ') << "(unknown exception)" << std::endl;
+	}
+	inline void PrintException(std::ostream& os, const std::exception& e, const int indent=0) {
+		os << std::string(indent*4, ' ') << "std::exception: " << e.what() << std::endl;
+	}
+	inline void PrintNestedException(std::ostream& os, const std::exception& e, const int indent=0) {
+		os << std::string(indent*4, ' ') << "exception: " << e.what() << std::endl;
+		try {
+			std::rethrow_if_nested(e);
+		} catch(const std::exception& e) {
+			PrintNestedException(os, e, indent+1);
+		} catch(...) {
+			PrintException(os, indent+1);
+		}
+	}
+	class ExceptionScope {
+		private:
+			using SH = ScopeHolder<>;
+			using Scope = typename SH::Scope;
+			Scope			_prevScope;
+		public:
+			ExceptionScope(const char* msg, const SourcePos& pos):
+				_prevScope(SH::tls_scope)
+			{
+				SH::tls_scope = Scope{msg, pos};
+			}
+			~ExceptionScope() noexcept(false) {
+				if(!std::uncaught_exception())
+					SH::tls_scope = _prevScope;
+			}
+	};
 }
+#if defined(DEBUG) && defined(THROW_ON_FAILURE)
+	#define D_Scope(name) try { ::lubee::ExceptionScope scope_##__LINE__(name, SOURCEPOS);
+	#define D_ScopeEnd() } catch(const ::lubee::AssertionFailed& e) { \
+		const auto& s = ::lubee::ScopeHolder<>::tls_scope; \
+		std::throw_with_nested(::lubee::AssertionFailed(s.name, s.pos, SOURCEPOS)); \
+	}
+	namespace lubee {
+		template <class CB, class... Ts>
+		void CallMain(std::ostream& os, CB&& cb, Ts&&... ts) {
+			try {
+				cb(std::forward<Ts>(ts)...);
+			} catch(...) {
+				try {
+					std::rethrow_exception(std::current_exception());
+				} catch(const std::exception& e) {
+					PrintNestedException(os, e);
+				} catch(...) {
+					PrintException(os);
+				}
+			}
+		}
+	}
+#else
+	#define D_Scope(name) {
+	#define D_ScopeEnd() }
+	namespace lubee {
+		template <class CB, class... Ts>
+		void CallMain(std::ostream&, CB&& cb, Ts&&... ts) {
+			cb(std::forward<Ts>(ts)...);
+		}
+	}
+#endif
