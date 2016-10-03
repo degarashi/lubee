@@ -58,14 +58,14 @@ namespace lubee {
 
 //! クラスが特定の名前の定数値を持っているかチェック
 /*! DEF_HASTYPE(type_name)
-	HasType_type_name<class_name>(nullptr) -> std::true_type or std::false_type */
-#define DEF_HASTYPE(name) \
+	HasValue_type_name<class_name>(nullptr) -> std::true_type or std::false_type */
+#define DEF_HASVALUE(name) \
 	template <class T> \
-	std::true_type HasType_##name(decltype(T::name)*); \
+	std::true_type HasValue_##name(decltype(T::name)*); \
 	template <class T> \
-	std::false_type HasType_##name(...); \
+	std::false_type HasValue_##name(...); \
 	template <class T> \
-	using HasType_##name##_t = decltype(HasType_##name<T>(nullptr));
+	using HasValue_##name##_t = decltype(HasValue_##name<T>(nullptr));
 
 //! クラスが特定の名前のtype aliasを持っているかチェック
 /*! DEF_HASTYPE_T(type_name)
@@ -77,5 +77,3 @@ namespace lubee {
 	std::false_type HasTypeT_##name(...); \
 	template <class T> \
 	using HasTypeT_##name##_t = decltype(HasTypeT_##name<T>(nullptr));
-
-
