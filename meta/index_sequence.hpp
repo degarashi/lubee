@@ -1,8 +1,8 @@
 #pragma once
 #include <utility>
 #include <tuple>
-#include "meta/enable_if.hpp"
-#include "meta/constant_t.hpp"
+#include "enable_if.hpp"
+#include "constant_t.hpp"
 
 namespace lubee {
 	namespace seq {
