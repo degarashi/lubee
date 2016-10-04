@@ -72,7 +72,7 @@ namespace lubee {
 	HasTypeT_type_name<class_name>(nullptr) -> std::true_type or std::false_type */
 #define DEF_HASTYPE_T(name) \
 	template <class T> \
-	std::true_type HasTypeT_##name(typename T::type*); \
+	std::true_type HasTypeT_##name(typename T::name*); \
 	template <class T> \
 	std::false_type HasTypeT_##name(...); \
 	template <class T> \
