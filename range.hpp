@@ -20,7 +20,9 @@ namespace lubee {
 			Range(static_cast<T>(r.from), static_cast<T>(r.to)) {}
 		explicit constexpr Range(const value_t& f) noexcept(ExEq):
 			Range(-f, f)
-		{}
+		{
+			D_Expect(f>=0, "invalid range");
+		}
 		constexpr Range(const value_t& f, const value_t& t) noexcept(ExEq):
 			from(f),
 			to(t)
@@ -34,8 +36,7 @@ namespace lubee {
 		}
 		//! 範囲が重なっているか
 		bool hit(const Range& r) const noexcept(ExCmp) {
-			return !(to < r.from
-					&& from > r.to);
+			return !(to < r.from || from > r.to);
 		}
 		bool operator == (const Range& r) const noexcept(ExCmp) {
 			return from == r.from
