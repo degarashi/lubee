@@ -18,5 +18,8 @@ if(NOT without-test)
 	include_directories(${GTEST_INCLUDE_DIRS})
 	# testsディレクトリ以下のソースが対象
 	aux_source_directory(tests TEST_SRC)
-	AddTest(test "${TEST_SRC}")
+	# alignedalloc関連の物は個別にexeを作成
+	MakeSeparationTest("alignedalloc" TEST_SRC)
+	# 他はotherとしてまとめる
+	AddTest(other "${TEST_SRC}")
 endif()
