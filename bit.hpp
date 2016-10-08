@@ -48,4 +48,15 @@ namespace lubee {
 			return Count(uint32_t(v)) + Count(uint32_t(v>>32));
 		}
 	}
+	// コンパイル時計算
+	namespace cbit {
+		template <unsigned int N>
+		struct MSB_N { constexpr static int result = 1 + MSB_N<(N >> 1)>::result; };
+		template <>
+		struct MSB_N<1> { constexpr static int result = 0; };
+		template <>
+		struct MSB_N<0> { constexpr static int result = 0; };
+		template <unsigned int N>
+		struct LowClear { constexpr static unsigned int result = 1 << MSB_N<N>::result; };
+	}
 }
