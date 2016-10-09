@@ -35,6 +35,12 @@
 #define Expect0(exp)			AssertBase(Warn, exp, "(no message)")
 #define Expect(...)				AssertBase(Warn, __VA_ARGS__)
 
+#ifdef DEBUG
+	#define NOEXCEPT_IF_RELEASE
+#else
+	#define NOEXCEPT_IF_RELEASE noexcept
+#endif
+
 namespace lubee {
 	//! ソースコード上の位置を表す情報
 	struct SourcePos {
