@@ -3,6 +3,11 @@
 
 namespace lubee {
 	namespace bit {
+		//! 引数が0なら0を、それ以外なら~0を返す
+		template <class T>
+		inline T ZeroOrFull(const T& t) {
+			return (t | -t) >> (sizeof(T)*8-1);
+		}
 		//! 入力値の一番左のビットだけを残す
 		template <class T, ENABLE_IF(std::is_unsigned<T>{})>
 		inline constexpr T LowClear(T x) noexcept {
