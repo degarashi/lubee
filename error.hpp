@@ -63,8 +63,12 @@ namespace lubee {
 
 		//! アサート失敗時の挙動: ログメッセージ
 		struct Warn {
-			Warn(const std::string& msg, const SourcePos& pos) {
-				std::cerr << msg << std::endl << pos << std::endl;
+			Warn(const std::string& msg, const SourcePos& pos) noexcept {
+				try {
+					std::cerr << msg << std::endl << pos << std::endl;
+				} catch(...) {
+					// 例外を外へ出さない
+				}
 			}
 		};
 		//! アサート失敗時の挙動: 例外を送出
@@ -75,23 +79,30 @@ namespace lubee {
 		};
 		//! アサート失敗時の挙動: デバッガをブリーク
 		struct Trap : Warn {
-			Trap(const std::string& msg, const SourcePos& pos): Warn(msg, pos) {
+			Trap(const std::string& msg, const SourcePos& pos) noexcept: Warn(msg, pos) {
 				__builtin_trap();
 			}
 		};
 	}
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wformat-security"
+	//! デバッグメッセージの生成
+	/*! 何かエラーが発生した時にコールされるので例外は送出しない */
 	template <class... Ts>
-	std::string MakeAssertMessage(const char* expr, const char* fmt, Ts&&... ts) {
-		constexpr std::size_t BuffSize = 2048;
-		char buff[BuffSize];
-		std::snprintf(buff, BuffSize, fmt, std::forward<Ts>(ts)...);
-		std::string ret("---<assertion failed!>---\nexpression: ");
-		ret.append(expr);
-		ret.append("\n");
-		ret.append(buff);
-		return ret;
+	std::string MakeAssertMessage(const char* expr, const char* fmt, Ts&&... ts) noexcept {
+		try {
+			constexpr std::size_t BuffSize = 2048;
+			char buff[BuffSize];
+			std::snprintf(buff, BuffSize, fmt, std::forward<Ts>(ts)...);
+			std::string ret("---<assertion failed!>---\nexpression: ");
+			ret.append(expr);
+			ret.append("\n");
+			ret.append(buff);
+			return ret;
+		} catch(...) {
+			// 何か例外が発生したら空のメッセージを返す
+			return std::string();
+		}
 	}
 	#pragma GCC diagnostic pop
 
