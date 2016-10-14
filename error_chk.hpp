@@ -32,6 +32,10 @@ namespace lubee {
 			func(std::forward<TsA>(ts)...);
 			EChk<Act>(chk, pos);
 		}
+		template <class Act, class Chk>
+		void EChk_polling(Chk&& chk, const SourcePos& pos) {
+			EChk<Act>(chk, pos);
+		}
 		// APIがエラーコードを返すタイプ
 		template <class Act, class Chk, class Func, class... TsA>
 		auto EChk_return(Chk&& chk, const SourcePos& pos, Func&& func, TsA&&... ts) {
@@ -62,6 +66,8 @@ namespace lubee {
 		auto EChk_polling_d(Chk&&, const SourcePos&, Func&& func, Ts&&... ts) {
 			return func(std::forward<Ts>(ts)...);
 		}
+		template <class Act, class Chk>
+		void EChk_polling_d(Chk&&, const SourcePos&) {}
 		template <class Act, class... Ts>
 		auto EChk_return_d(Ts&&... ts) {
 			return EChk_polling_d<Act>(std::forward<Ts>(ts)...);
