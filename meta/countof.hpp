@@ -10,7 +10,7 @@ namespace lubee {
 	template <class T, std::size_t N>
 	typename GetCountOf_helper<N>::type& GetCountOf(T (&)[N]);
 	//! 配列の要素数を取得する (配列でない場合はエラー)
-	#define countof(e)		sizeof(::spn::GetCountOf(e))
+	#define countof(e)		sizeof(::lubee::GetCountOf(e))
 
 	template <class T>
 	char GetCountOfNA(T);
