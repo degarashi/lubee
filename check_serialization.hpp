@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
-#include <cereal/cereal.hpp>
 
 namespace lubee {
 	// ---- for serialization check ----
