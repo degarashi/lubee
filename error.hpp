@@ -12,7 +12,7 @@
 #ifdef DEBUG
 	#ifdef THROW_ON_FAILURE
 		// アサート失敗時にブレークせず、代わりに例外を投げる
-		#define ON_FAIL		Throw
+		#define ON_FAIL		Throw<::lubee::err::AssertionFailed>
 	#else
 		#define ON_FAIL		Trap
 	#endif
@@ -72,9 +72,10 @@ namespace lubee {
 			}
 		};
 		//! アサート失敗時の挙動: 例外を送出
+		template <class E>
 		struct Throw : Warn {
 			Throw(const std::string& msg, const SourcePos& pos): Warn(msg, pos) {
-				throw AssertionFailed(msg);
+				throw E(msg);
 			}
 		};
 		//! アサート失敗時の挙動: デバッガをブリーク
