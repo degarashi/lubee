@@ -1,6 +1,5 @@
 #pragma once
 #include "error.hpp"
-#include <cereal/cereal.hpp>
 
 namespace lubee {
 	template <class T>
@@ -59,10 +58,9 @@ namespace lubee {
 		DEF_OP(*)
 		DEF_OP(/)
 		#undef DEF_OP
-		template <class Ar>
-		void serialize(Ar& ar) {
-			ar(CEREAL_NVP(from), CEREAL_NVP(to));
-		}
+
+		template <class Ar, class T2>
+		friend void serialize(Ar&, Range<T2>&);
 	};
 	using RangeI = Range<int_fast32_t>;
 	using RangeF = Range<float>;

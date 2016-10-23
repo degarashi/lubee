@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "../random/range.hpp"
+#include "../serialization/range.hpp"
 
 namespace lubee {
 	namespace test {

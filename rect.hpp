@@ -166,15 +166,8 @@ namespace lubee {
 				}
 				return std::make_pair(false, Rect());
 			}
-			template <class Ar>
-			void serialize(Ar& ar) {
-				ar(
-					CEREAL_NVP(x0),
-					CEREAL_NVP(x1),
-					CEREAL_NVP(y0),
-					CEREAL_NVP(y1)
-				);
-			}
+			template <class Ar, class T2>
+			friend void serialize(Ar&, Rect<T2>&);
 	};
 	using RectI = Rect<int32_t>;
 	using RectF = Rect<float>;
@@ -214,10 +207,8 @@ namespace lubee {
 			value_t		_value;
 
 		public:
-			template <class Ar>
-			void serialize(Ar& ar) {
-				ar(CEREAL_NVP(_value));
-			}
+			template <class Ar, class T2, template <class> class P2>
+			friend void serialize(Ar&, PowValue<T2, P2>&);
 			//TODO: テンプレートによる静的な値補正
 			PowValue(const value_t& t):
 				_value(P::proc(t))
