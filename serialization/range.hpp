@@ -5,6 +5,9 @@
 namespace lubee {
 	template <class Ar, class T>
 	void serialize(Ar& ar, Range<T>& r) {
-		ar(CEREAL_NVP(r.from), CEREAL_NVP(r.to));
+		ar(
+			cereal::make_nvp("from", r.from),
+			cereal::make_nvp("to", r.to)
+		);
 	}
 }
