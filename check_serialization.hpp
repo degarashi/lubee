@@ -1,36 +1,44 @@
 #include <gtest/gtest.h>
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
+#include <cereal/types/memory.hpp>
 
 namespace lubee {
 	// ---- for serialization check ----
-	template <class OA, class IA, class T>
-	void _CheckSerialization(const T& src) {
+	template <class OA, class IA, class Init>
+	void _CheckSerialization(Init&& init) {
+		using T = std::remove_pointer_t<decltype(init())>;
+		using Up = std::unique_ptr<T>;
+		Up ptr0(init()),
+		   ptr1;
 		std::stringstream buffer;
 		{
 			OA oa(buffer);
-			oa(CEREAL_NVP(src));
+			oa(cereal::make_nvp("obj", ptr0));
 		}
-		T loaded;
 		{
 			IA ia(buffer);
-			ia(cereal::make_nvp("src", loaded));
+			ia(cereal::make_nvp("obj", ptr1));
 		}
-		ASSERT_EQ(src, loaded);
+		ASSERT_EQ(*ptr0, *ptr1);
 	}
-	template <class T>
-	void CheckSerializationBin(const T& src) {
+	template <class Make>
+	void CheckSerializationBin(Make&& m) {
 		_CheckSerialization<cereal::BinaryOutputArchive,
-							cereal::BinaryInputArchive>(src);
+							cereal::BinaryInputArchive>(m);
 	}
-	template <class T>
-	void CheckSerializationJSON(const T& src) {
+	template <class Make>
+	void CheckSerializationJSON(Make&& m) {
 		_CheckSerialization<cereal::JSONOutputArchive,
-							cereal::JSONInputArchive>(src);
+							cereal::JSONInputArchive>(m);
+	}
+	template <class Make>
+	void CheckSerializationWithMake(Make&& m) {
+		CheckSerializationBin(m);
+		CheckSerializationJSON(m);
 	}
 	template <class T>
 	void CheckSerialization(const T& src) {
-		CheckSerializationBin(src);
-		CheckSerializationJSON(src);
+		CheckSerializationWithMake([&](){ return new T(src); });
 	}
 }
