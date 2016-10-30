@@ -31,9 +31,11 @@
 #define AssertF0()				Assert0(false)
 #define Assert0(exp)			AssertBase(ON_FAIL, exp, "(no message)")
 #define Assert(...)				AssertBase(ON_FAIL, __VA_ARGS__)
+#define AssertF(...)			{ Assert(false, __VA_ARGS__); throw 0; }
 #define ExpectF0()				Expect0(false)
 #define Expect0(exp)			AssertBase(Warn, exp, "(no message)")
 #define Expect(...)				AssertBase(Warn, __VA_ARGS__)
+#define ExpectF(...)			{ Expect(false, __VA_ARGS__); throw 0; }
 
 #ifdef DEBUG
 	#define NOEXCEPT_IF_RELEASE
