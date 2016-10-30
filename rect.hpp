@@ -2,6 +2,7 @@
 #include "size.hpp"
 #include "meta/check_macro.hpp"
 #include "meta/countof.hpp"
+#include "operators.hpp"
 
 namespace lubee {
 	DEF_HASMETHOD(x)
@@ -199,7 +200,9 @@ namespace lubee {
 	//! 2の乗数しか代入できない型
 	/*! 0も許可されない */
 	template <class T, template <class> class Policy>
-	class PowValue {
+	class PowValue : public op::Cmp<PowValue<T,Policy>>,
+					public op::Arithmetic<PowValue<T,Policy>>
+	{
 		public:
 			using value_t = T;
 		private:
@@ -221,6 +224,20 @@ namespace lubee {
 				_value = P::proc(t);
 				return *this;
 			}
+			bool operator == (const PowValue& v) const noexcept {
+				return _value == v._value;
+			}
+			bool operator < (const PowValue& v) const noexcept {
+				return _value < v._value;
+			}
+			#define DEF_OP(op) \
+				auto operator op (const PowValue& v) const noexcept { \
+					return _value op v._value; }
+			DEF_OP(+)
+			DEF_OP(-)
+			DEF_OP(*)
+			DEF_OP(/)
+			#undef DEF_OP
 			const value_t& get() const {
 				return _value;
 			}
