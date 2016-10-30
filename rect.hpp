@@ -3,6 +3,7 @@
 #include "meta/check_macro.hpp"
 #include "meta/countof.hpp"
 #include "operators.hpp"
+#include "error.hpp"
 
 namespace lubee {
 	DEF_HASMETHOD(x)
