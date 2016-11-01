@@ -23,7 +23,7 @@ namespace lubee {
 				};
 				value_t		ar[4];
 			};
-	
+
 			Rect() = default;
 			Rect(const Rect& r) = default;
 			Rect(const value_t& x_0, const value_t& x_1, const value_t& y_0, const value_t& y_1):
@@ -113,7 +113,7 @@ namespace lubee {
 			DEF_OP(*)
 			DEF_OP(/)
 			#undef DEF_OP
-	
+
 			//! 領域の拡大縮小
 			/*!
 				負数で領域の縮小

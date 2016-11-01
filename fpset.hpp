@@ -58,7 +58,7 @@ namespace lubee {
 			t_exp = t_exp - IE16::ExpZero + IE::ExpZero;
 			t_exp &= mask;								// 指数のマイナス飽和
 			t_exp |= ~mask2 & ((1<<IE::ExpBits)-1);		// 指数のプラス飽和
-			
+
 			exp = t_exp;
 			fract = t_fract;
 			sign = fp.sign;
@@ -100,7 +100,7 @@ namespace lubee {
 		mask |= mask2;
 		int32_t t_fract = fp.fract >> (IE32::FracBits - IE::FracBits);
 		t_fract &= ~(mask|mask2);
-		
+
 		exp = t_exp;
 		sign = fp.sign;
 		fract = t_fract;

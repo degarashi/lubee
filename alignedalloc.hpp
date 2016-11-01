@@ -189,19 +189,19 @@ namespace lubee {
 			using reference = T&;
 			using const_reference = const T&;
 			using value_type = T;
-			
+
 			// アロケータをU型にバインドする
 			template <class U>
 			struct rebind {
 				using other = AlignedPool<U>;
 			};
-			
+
 			//! コンストラクタ
 			AlignedPool() noexcept {}
 			AlignedPool(const AlignedPool&) noexcept {}
 			//! デストラクタ
 			~AlignedPool() noexcept {}
-			
+
 			//! メモリを割り当てる
 			pointer allocate(const size_type num /*, typename AlignedPool<T,Align>::const_pointer hint = 0*/) {
 				const auto ret = reinterpret_cast<uintptr_t>(std::malloc(TSize * num + Align));
@@ -215,7 +215,7 @@ namespace lubee {
 			void construct(pointer p, Ts&&... ts) {
 				new( (void*)p ) T(std::forward<Ts>(ts)...);
 			}
-			
+
 			//! メモリを解放する
 			void deallocate(pointer p, size_type /*num*/) {
 				auto up = (uintptr_t)p;
@@ -227,7 +227,7 @@ namespace lubee {
 			void destroy(pointer p) {
 				p->~T();
 			}
-			
+
 			//! アドレスを返す
 			pointer address(reference value) const noexcept { return &value; }
 			const_pointer address(const_reference value) const noexcept { return &value; }
@@ -242,7 +242,7 @@ namespace lubee {
 	bool operator==(const AlignedPool<T1>&, const AlignedPool<T2>&) noexcept { return false; }
 	template <class T>
 	bool operator==(const AlignedPool<T>&, const AlignedPool<T>&) noexcept { return true; }
-	
+
 	template <class T1, class T2>
 	bool operator!=(const AlignedPool<T1>&, const AlignedPool<T2>&) noexcept { return true; }
 	template <class T>
