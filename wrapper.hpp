@@ -7,6 +7,11 @@ namespace lubee {
 		using value_t = T;
 		value_t		_value;
 
+		template <class Ar>
+		value_t save_minimal(const Ar&) const { return _value; }
+		template <class Ar>
+		void load_minimal(const Ar&, const value_t& v) { _value = v; }
+
 		template <class... Args>
 		Wrapper(Args&&... args):
 			_value(std::forward<Args>(args)...)
