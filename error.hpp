@@ -1,10 +1,9 @@
 #pragma once
-#include <iostream>
 #include <cstdio>
 #include <stdexcept>
 #include <sstream>
+#include "output.hpp"
 
-#define SOURCEPOS ::lubee::SourcePos{__FILE__, __PRETTY_FUNCTION__, __func__, __LINE__}
 #define AssertBase(typ, exp, ...) \
 	if(!(exp)) { \
 		::lubee::err::typ{::lubee::MakeAssertMessage(#exp, __VA_ARGS__), SOURCEPOS}; \
@@ -44,30 +43,15 @@
 #endif
 
 namespace lubee {
-	//! ソースコード上の位置を表す情報
-	struct SourcePos {
-		const char	*filename,
-					*funcname,
-					*funcname_short;
-		int			line;
-	};
-	inline std::ostream& operator << (std::ostream& s, const SourcePos& p) {
-		using std::endl;
-		return s
-			<< "at file:\t" << p.filename << endl
-			<< "at function:\t" << p.funcname << endl
-			<< "on line:\t" << p.line;
-	}
 	namespace err {
 		struct AssertionFailed : std::runtime_error {
 			using std::runtime_error::runtime_error;
 		};
-
 		//! アサート失敗時の挙動: ログメッセージ
 		struct Warn {
 			Warn(const std::string& msg, const SourcePos& pos) noexcept {
 				try {
-					std::cerr << msg << std::endl << pos << std::endl;
+					::lubee::log::Log::Output(::lubee::log::Type::Error, pos, msg);
 				} catch(...) {
 					// 例外を外へ出さない
 				}
