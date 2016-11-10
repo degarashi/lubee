@@ -18,10 +18,19 @@ namespace lubee {
 			}
 			return x & ~(x>>1);
 		}
+		//! least significant bit を取得
+		/*! もし入力値が0の場合は31を返す */
+		inline constexpr uint32_t LSB(uint32_t x) {
+			constexpr char NLRZ_TABLE[33] = "\x1f\x00\x01\x0e\x1c\x02\x16\x0f\x1d\x1a\x03\x05\x0b\x17"
+										"\x07\x10\x1e\x0d\x1b\x15\x19\x04\x0a\x06\x0c\x14\x18\x09"
+										"\x13\x08\x12\x11";
+			x |= 0x80000000;
+			return NLRZ_TABLE[0x0aec7cd2U * (x & -x) >> 27];
+		}
 		//! most significant bit を取得
 		/*! もし入力値が0の場合は0を返す */
 		inline constexpr uint32_t MSB(uint32_t x) noexcept {
-			const char NLRZ_TABLE[33] = "\x1f\x00\x01\x0e\x1c\x02\x16\x0f\x1d\x1a\x03\x05\x0b\x17"
+			constexpr char NLRZ_TABLE[33] = "\x1f\x00\x01\x0e\x1c\x02\x16\x0f\x1d\x1a\x03\x05\x0b\x17"
 										"\x07\x10\x1e\x0d\x1b\x15\x19\x04\x0a\x06\x0c\x14\x18\x09"
 										"\x13\x08\x12\x11";
 			x |= 0x01;
