@@ -1,7 +1,17 @@
 #pragma once
 #include <algorithm>
+#include "meta/enable_if.hpp"
 
 namespace lubee {
+	template <class T>
+	struct Wrapper;
+	template <class T>
+	std::false_type is_wrapper(T*);
+	template <class T>
+	std::true_type is_wrapper(Wrapper<T>*);
+	template <class T>
+	using is_wrapper_t = decltype(is_wrapper((T*)nullptr));
+
 	template <class T>
 	struct Wrapper {
 		using value_t = T;
@@ -12,22 +22,37 @@ namespace lubee {
 		template <class Ar>
 		void load_minimal(const Ar&, const value_t& v) { _value = v; }
 
-		template <class... Args>
-		Wrapper(Args&&... args):
-			_value(std::forward<Args>(args)...)
+		Wrapper() = default;
+		template <class A0, class... Args>
+		explicit Wrapper(A0&& a0, Args&&... args):
+			_value(std::forward<A0>(a0), std::forward<Args>(args)...)
 		{}
-		Wrapper& operator = (const value_t& t) {
-			_value = t;
+		template <class A, ENABLE_IF(!is_wrapper_t<A>{})>
+		explicit Wrapper(A&& arg):
+			_value(std::forward<A>(arg))
+		{}
+		template <
+			class A,
+			 ENABLE_IF((
+				std::is_assignable<value_t, A>{}
+			))
+		>
+		Wrapper& operator = (A&& a) {
+			_value = std::forward<A>(a);
 			return *this;
 		}
-		Wrapper& operator = (value_t&& t) {
-			_value = std::move(t);
+		Wrapper& operator = (const value_t& a) {
+			_value = a;
 			return *this;
 		}
-		operator const T& () const noexcept {
+		Wrapper& operator = (value_t&& a) {
+			_value = std::move(a);
+			return *this;
+		}
+		operator const value_t& () const noexcept {
 			return _value;
 		}
-		operator T& () noexcept {
+		operator value_t& () noexcept {
 			return _value;
 		}
 		bool operator == (const value_t& t) const noexcept {
@@ -45,13 +70,6 @@ namespace lubee {
 	inline bool operator != (const T& t0, const Wrapper<T>& t1) noexcept {
 		return t0 != t1._value;
 	}
-
-	template <class T>
-	std::false_type is_wrapper(T*);
-	template <class T>
-	std::true_type is_wrapper(Wrapper<T>*);
-	template <class T>
-	using is_wrapper_t = decltype(is_wrapper((T*)nullptr));
 
 	template <class T>
 	inline decltype(auto) wrapper_value(const T& v, std::true_type) noexcept {
