@@ -26,6 +26,13 @@ namespace lubee {
 
 			Rect() = default;
 			Rect(const Rect& r) = default;
+			template <class T2>
+			Rect(const Rect<T2>& s):
+				x0(s.x0),
+				x1(s.x1),
+				y0(s.y0),
+				y1(s.y1)
+			{}
 			Rect(const value_t& x_0, const value_t& x_1, const value_t& y_0, const value_t& y_1):
 				x0(x_0), x1(x_1), y0(y_0), y1(y_1)
 			{
