@@ -79,6 +79,11 @@ namespace lubee {
 			T getUniform(const Range<T>& range) {
 				return typename Dist_t<T>::uniform_t(range.from, range.to)(_mt);
 			}
+			//! Lua用の互換ルーチン
+			template <class T, ENABLE_IF(lubee::is_number<T>{})>
+			T luaGetUniform(const Range<T>& range) {
+				return getUniform<T>(range);
+			}
 			//! 一様分布を返すファンクタを作成
 			template <class T, ENABLE_IF(lubee::is_number<T>{})>
 			auto getUniformF(const Range<T>& r) noexcept {
