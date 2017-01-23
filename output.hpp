@@ -3,6 +3,7 @@
 #include "niftycounter.hpp"
 #include <memory>
 #include <iostream>
+#include <sstream>
 
 #ifdef ANDROID
 	#include <android/log.h>
@@ -35,36 +36,29 @@ namespace lubee {
 						#ifdef ANDROID
 							LOGE(msg.c_str());
 						#else
-							std::cerr << "Error:" << std::endl << msg << std::endl;
+							std::cerr << "<Error> " << msg << std::endl;
 						#endif
 						break;
 					case Type::Info:
 						#ifdef ANDROID
 							LOGI(msg.c_str());
 						#else
-							std::cerr << "Info:" << std::endl << msg << std::endl;
+							std::cerr << "<Info> " << msg << std::endl;
 						#endif
 						break;
 					case Type::Verbose:
 						#ifdef ANDROID
 							LOGV(msg.c_str());
 						#elif not defined(NDEBUG)
-							std::cout << msg << std::endl;
+							std::cout << "<Verbose> " << msg << std::endl;
 						#endif
 						break;
 				}
 			}
 			void print(const Type::e type, const SourcePos& pos, const std::string& msg) override {
-				#ifdef ANDROID
-				{
-					std::stringstream ss;
-					ss << pos << std::ends;
-					print(type, ss.str());
-				}
-				#else
-					std::cerr << "At " << pos << std::endl;
-				#endif
-				print(type, msg);
+				std::stringstream ss;
+				ss << pos << std::endl << msg;
+				print(type, ss.str());
 			}
 		};
 		class Log {

@@ -13,8 +13,7 @@ namespace lubee {
 	inline std::ostream& operator << (std::ostream& s, const SourcePos& p) {
 		using std::endl;
 		return s
-			<< "at file:\t" << p.filename << endl
-			<< "at function:\t" << p.funcname << endl
-			<< "on line:\t" << p.line;
+			<< "file = " << p.filename << ':' << p.line << endl
+			<< "function = " << p.funcname;
 	}
 }
