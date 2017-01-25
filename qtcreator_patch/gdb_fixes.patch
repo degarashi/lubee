@@ -1,0 +1,168 @@
+diff --git a/dumper.py b/dumper.py
+index 104c20a..68504d2 100644
+--- a/dumper.py
++++ b/dumper.py
+@@ -131,6 +131,9 @@ def arrayForms():
+ def mapForms():
+     return [CompactMapFormat]
+
++def lb_SetNative(dst, nv):
++    dst.native = nv
++    return dst
+
+ class ReportItem:
+     """
+@@ -2748,6 +2751,7 @@ class DumperBase:
+             self.lbitsize = None
+             self.targetValue = None # For references.
+             self.isBaseClass = None
++            self.native = None
+
+         def copy(self):
+             val = self.dumper.Value(self.dumper)
+@@ -2761,6 +2765,7 @@ class DumperBase:
+             val.lbitpos = self.lbitpos
+             val.lbitsize = self.lbitsize
+             val.targetValue = self.targetValue
++            val.native = self.native
+             return val
+
+         def check(self):
+@@ -2844,7 +2849,7 @@ class DumperBase:
+             if self.type.code == TypeCodeTypedef:
+                 return self.findMemberByName(self.detypedef())
+             if self.type.code in (TypeCodePointer, TypeCodeReference):
+-                res = self.dereference().findMemberByName(name)
++                res = lb_SetNative(self.dereference(), self.native.dereference()).findMemberByName(name)
+                 if res is not None:
+                     return res
+             if self.type.code == TypeCodeStruct:
+@@ -2892,7 +2897,7 @@ class DumperBase:
+             elif self.dumper.isInt(index):
+                 if self.type.code in (TypeCodeArray, TypeCodePointer):
+                     itemAddress = self.laddress + int(index) * self.type.ltarget.size()
+-                    return self.dumper.createValue(itemAddress, self.type.ltarget)
++                    return lb_SetNative(self.dumper.createValue(itemAddress, self.type.ltarget), self.native[index])
+                 return self.members(False)[index]
+             else:
+                 error('BAD INDEX TYPE %s' % type(index))
+@@ -2925,7 +2930,7 @@ class DumperBase:
+                     val.laddress = self.laddress
+                 if self.ldata is not None:
+                     val.ldata = self.ldata
+-                return val
++                return lb_SetNative(val, self.native)
+
+             fieldBitsize = field.lbitsize
+             fieldSize = (fieldBitsize + 7) // 8
+@@ -2962,6 +2967,13 @@ class DumperBase:
+                     val = self.dumper.createReferenceValue(val.laddress, fieldType.ltarget)
+                     val.name = field.name
+
++            try:
++                self.native[field.name]
++            except:
++                val.native = self.native
++            else:
++                val.native = self.native[field.name]
++
+             #warn('GOT VAL %s FOR FIELD %s' % (val, field))
+             val.lbitsize = fieldBitsize
+             val.check()
+@@ -2990,7 +3002,7 @@ class DumperBase:
+             anonNumber = 0
+             for field in fields:
+                 if isinstance(field, self.dumper.Value):
+-                    res.append(field)
++                    res.append(lb_SetNative(field, self.native[field.name]))
+                     continue
+                 if field.isBaseClass and not includeBases:
+                     continue
+@@ -3019,7 +3031,7 @@ class DumperBase:
+         def dereference(self):
+             self.check()
+             if self.type.code == TypeCodeTypedef:
+-                return self.detypedef().dereference()
++                return lb_SetNative(self.detypedef().dereference(), self.native.dereference())
+             val = self.dumper.Value(self.dumper)
+             if self.type.code == TypeCodeReference:
+                 val.laddress = self.pointer()
+@@ -3036,7 +3048,7 @@ class DumperBase:
+             #dynTypeName = val.type.dynamicTypeName(val.laddress)
+             #if dynTypeName is not None:
+             #    val.type = self.dumper.createType(dynTypeName)
+-            return val
++            return lb_SetNative(val, self.native.dereference())
+
+         def detypedef(self):
+             self.check()
+diff --git a/gdbbridge.py b/gdbbridge.py
+index f78b5fc..4a65a6b 100644
+--- a/gdbbridge.py
++++ b/gdbbridge.py
+@@ -223,6 +223,7 @@ class Dumper(DumperBase):
+             targetType = self.fromNativeType(nativeType.target().unqualified(), nativeValue)
+             val = self.createReferenceValue(toInteger(nativeValue.address), targetType)
+             #warn('CREATED REF: %s' % val)
++            val.native = nativeValue
+             return val
+         if code == gdb.TYPE_CODE_PTR:
+             try:
+@@ -235,6 +236,7 @@ class Dumper(DumperBase):
+             if not nativeValue.address is None:
+                 val.laddress = toInteger(nativeValue.address)
+             #warn('CREATED PTR 2: %s' % val)
++            val.native = nativeValue
+             return val
+         if code == gdb.TYPE_CODE_TYPEDEF:
+             targetType = nativeType.strip_typedefs().unqualified()
+@@ -247,6 +249,7 @@ class Dumper(DumperBase):
+                 val = self.fromNativeValue(nativeValue.cast(targetType))
+             val.type = self.fromNativeType(nativeType, nativeValue)
+             #warn('CREATED TYPEDEF: %s' % val)
++            val.native = nativeValue
+             return val
+
+         val = self.Value(self)
+@@ -261,6 +264,7 @@ class Dumper(DumperBase):
+                 buf[i] = int(y[i])
+             val.ldata = bytes(buf)
+
++        val.native = nativeValue
+         val.type = self.fromNativeType(nativeType, nativeValue)
+         val.lIsInScope = not nativeValue.is_optimized_out
+         code = nativeType.code
+diff --git a/stdtypes.py b/stdtypes.py
+index 4b6308c..cdc4776 100644
+--- a/stdtypes.py
++++ b/stdtypes.py
+@@ -701,15 +701,12 @@ def qdump__std____1__unique_ptr(d, value):
+
+
+ def qdump__std__pair(d, value):
+-    typeCode = '{%s}@{%s}' % (value.type[0].name, value.type[1].name)
+-    first, pad, second = value.split(typeCode)
++    first, second = value["first"], value["second"]
++    first.native, second.native = value.native["first"], value.native["second"]
+     with Children(d):
+         key = d.putSubItem('first', first)
+         value = d.putSubItem('second', second)
+-    d.putField('key', key.value)
+-    if key.encoding is not None:
+-        d.putField('keyencoded', key.encoding)
+-    d.putValue(value.value, value.encoding)
++    d.putType(first)
+
+ def qform__std__unordered_map():
+     return mapForms()
+@@ -881,7 +878,9 @@ def qdumpHelper__std__vector(d, value, isLibCpp):
+             (start, soffset, pad, finish, foffset, pad, alloc) = value.split("pI@pI@p")
+             size = (finish - start) * 8 + foffset - soffset # 8 is CHAR_BIT.
+     else:
+-        (start, finish, alloc) = value.split("ppp")
++        start = value["_M_start"].pointer()
++        finish = value["_M_finish"].pointer()
++        alloc = value["_M_end_of_storage"].pointer()
+         size = int((finish - start) / innerType.size())
+         d.check(finish <= alloc)
+         if size > 0:
