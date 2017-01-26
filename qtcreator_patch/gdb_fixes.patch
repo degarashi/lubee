@@ -1,18 +1,40 @@
 diff --git a/dumper.py b/dumper.py
-index 104c20a..68504d2 100644
+index 104c20a..3d5473d 100644
 --- a/dumper.py
 +++ b/dumper.py
-@@ -131,6 +131,9 @@ def arrayForms():
+@@ -33,6 +33,7 @@ import time
+ import json
+ import inspect
+ import threading
++import gdb
+
+ if sys.version_info[0] >= 3:
+     xrange = range
+@@ -131,6 +132,13 @@ def arrayForms():
  def mapForms():
      return [CompactMapFormat]
 
 +def lb_SetNative(dst, nv):
 +    dst.native = nv
 +    return dst
++def lb_GetArrayNative(d, ptr, typ):
++    TP = d.lookupNativeType(typ.name + "*")
++    A = gdb.Value(ptr).cast(TP)
++    return lb_SetNative(d.createValue(ptr, typ), A.dereference())
 
  class ReportItem:
      """
-@@ -2748,6 +2751,7 @@ class DumperBase:
+@@ -2078,7 +2086,8 @@ class DumperBase:
+             with Children(self, n, innerType, childNumChild, maxNumChild,
+                     addrBase=addrBase, addrStep=innerSize):
+                 for i in self.childRange():
+-                    self.putSubItem(i, self.createValue(addrBase + i * innerSize, innerType))
++                    ptr = addrBase + i * innerSize
++                    self.putSubItem(i, lb_GetArrayNative(self, ptr, innerType))
+
+     def putArrayItem(self, name, addr, n, typeName):
+         self.checkIntType(addr)
+@@ -2748,6 +2757,7 @@ class DumperBase:
              self.lbitsize = None
              self.targetValue = None # For references.
              self.isBaseClass = None
@@ -20,7 +42,7 @@ index 104c20a..68504d2 100644
 
          def copy(self):
              val = self.dumper.Value(self.dumper)
-@@ -2761,6 +2765,7 @@ class DumperBase:
+@@ -2761,6 +2771,7 @@ class DumperBase:
              val.lbitpos = self.lbitpos
              val.lbitsize = self.lbitsize
              val.targetValue = self.targetValue
@@ -28,7 +50,7 @@ index 104c20a..68504d2 100644
              return val
 
          def check(self):
-@@ -2844,7 +2849,7 @@ class DumperBase:
+@@ -2844,7 +2855,7 @@ class DumperBase:
              if self.type.code == TypeCodeTypedef:
                  return self.findMemberByName(self.detypedef())
              if self.type.code in (TypeCodePointer, TypeCodeReference):
@@ -37,7 +59,7 @@ index 104c20a..68504d2 100644
                  if res is not None:
                      return res
              if self.type.code == TypeCodeStruct:
-@@ -2892,7 +2897,7 @@ class DumperBase:
+@@ -2892,7 +2903,7 @@ class DumperBase:
              elif self.dumper.isInt(index):
                  if self.type.code in (TypeCodeArray, TypeCodePointer):
                      itemAddress = self.laddress + int(index) * self.type.ltarget.size()
@@ -46,7 +68,7 @@ index 104c20a..68504d2 100644
                  return self.members(False)[index]
              else:
                  error('BAD INDEX TYPE %s' % type(index))
-@@ -2925,7 +2930,7 @@ class DumperBase:
+@@ -2925,7 +2936,7 @@ class DumperBase:
                      val.laddress = self.laddress
                  if self.ldata is not None:
                      val.ldata = self.ldata
@@ -55,7 +77,7 @@ index 104c20a..68504d2 100644
 
              fieldBitsize = field.lbitsize
              fieldSize = (fieldBitsize + 7) // 8
-@@ -2962,6 +2967,13 @@ class DumperBase:
+@@ -2962,6 +2973,13 @@ class DumperBase:
                      val = self.dumper.createReferenceValue(val.laddress, fieldType.ltarget)
                      val.name = field.name
 
@@ -69,7 +91,7 @@ index 104c20a..68504d2 100644
              #warn('GOT VAL %s FOR FIELD %s' % (val, field))
              val.lbitsize = fieldBitsize
              val.check()
-@@ -2990,7 +3002,7 @@ class DumperBase:
+@@ -2990,7 +3008,7 @@ class DumperBase:
              anonNumber = 0
              for field in fields:
                  if isinstance(field, self.dumper.Value):
@@ -78,7 +100,7 @@ index 104c20a..68504d2 100644
                      continue
                  if field.isBaseClass and not includeBases:
                      continue
-@@ -3019,7 +3031,7 @@ class DumperBase:
+@@ -3019,7 +3037,7 @@ class DumperBase:
          def dereference(self):
              self.check()
              if self.type.code == TypeCodeTypedef:
@@ -87,14 +109,23 @@ index 104c20a..68504d2 100644
              val = self.dumper.Value(self.dumper)
              if self.type.code == TypeCodeReference:
                  val.laddress = self.pointer()
-@@ -3036,7 +3048,7 @@ class DumperBase:
+@@ -3036,7 +3054,7 @@ class DumperBase:
              #dynTypeName = val.type.dynamicTypeName(val.laddress)
              #if dynTypeName is not None:
              #    val.type = self.dumper.createType(dynTypeName)
 -            return val
-+            return lb_SetNative(val, self.native.dereference())
++            return lb_SetNative(val, self.native)
 
          def detypedef(self):
+             self.check()
+@@ -3073,7 +3091,7 @@ class DumperBase:
+             val.lbitsize = self.lbitsize
+             val.ldata = self.ldata
+             val.type = self.dumper.createType(typish)
+-            return val
++            return lb_SetNative(val, self.native.cast(self.d.lookupNativeType(typish.name)))
+
+         def downcast(self):
              self.check()
 diff --git a/gdbbridge.py b/gdbbridge.py
 index f78b5fc..4a65a6b 100644
@@ -133,7 +164,7 @@ index f78b5fc..4a65a6b 100644
          val.lIsInScope = not nativeValue.is_optimized_out
          code = nativeType.code
 diff --git a/stdtypes.py b/stdtypes.py
-index 4b6308c..cdc4776 100644
+index 4b6308c..fbe89d4 100644
 --- a/stdtypes.py
 +++ b/stdtypes.py
 @@ -701,15 +701,12 @@ def qdump__std____1__unique_ptr(d, value):
@@ -155,7 +186,71 @@ index 4b6308c..cdc4776 100644
 
  def qform__std__unordered_map():
      return mapForms()
-@@ -881,7 +878,9 @@ def qdumpHelper__std__vector(d, value, isLibCpp):
+@@ -722,16 +719,19 @@ def qdump__std__unordered_map(d, value):
+         # gcc ~= 4.7
+         size = value["_M_element_count"].integer()
+         start = value["_M_before_begin"]["_M_nxt"]
++        offset = 0
+     except:
+         try:
+             # libc++ (Mac)
+             size = value["_M_h"]["_M_element_count"].integer()
+             start = value["_M_h"]["_M_bbegin"]["_M_node"]["_M_nxt"]
++            offset = 0
+         except:
+             try:
+                 # gcc 4.9.1
+                 size = value["_M_h"]["_M_element_count"].integer()
+                 start = value["_M_h"]["_M_before_begin"]["_M_nxt"]
++                offset = 0
+             except:
+                 # gcc 4.6.2
+                 size = value["_M_element_count"].integer()
+@@ -740,18 +740,20 @@ def qdump__std__unordered_map(d, value):
+                 d.putItemCount(size)
+                 # We don't know where the data is
+                 d.putNumChild(0)
++                offset = d.ptrSize()
+                 return
+
+     d.putItemCount(size)
+     if d.isExpanded():
+-        keyType = value.type[0]
+-        valueType = value.type[1]
+-        typeCode = 'p@{%s}@{%s}' % (value.type[0].name, value.type[1].name)
++        T = d.lookupNativeType(value.type.name + "::value_type")
++        T2 = d.fromNativeType(T)
++        ptrSize = d.ptrSize()
+         p = start.pointer()
+         with Children(d, size):
+             for i in d.childRange():
+-                p, pad, key, pad, val = d.split(typeCode, p)
+-                d.putPairItem(i, (key, val))
++                ptr = p + ptrSize - offset
++                d.putSubItem(i, lb_GetArrayNative(d, ptr, T2))
++                p = d.extractPointer(p)
+
+ def qdump__std____debug__unordered_map(d, value):
+     qdump__std__unordered_map(d, value)
+@@ -782,12 +784,14 @@ def qdump__std__unordered_set(d, value):
+
+     d.putItemCount(size)
+     if d.isExpanded():
++        T = d.lookupNativeType(value.type.name + "::value_type")
++        T2 = d.fromNativeType(T)
+         p = start.pointer()
+-        valueType = value.type[0]
+-        with Children(d, size, childType=valueType):
++        with Children(d, size, childType=T2):
+             ptrSize = d.ptrSize()
+             for i in d.childRange():
+-                d.putSubItem(i, d.createValue(p + ptrSize - offset, valueType))
++                ptr = p + ptrSize - offset
++                d.putSubItem(i, lb_GetArrayNative(d, ptr, T2))
+                 p = d.extractPointer(p + offset)
+
+ def qform__std____1__unordered_map():
+@@ -881,7 +885,9 @@ def qdumpHelper__std__vector(d, value, isLibCpp):
              (start, soffset, pad, finish, foffset, pad, alloc) = value.split("pI@pI@p")
              size = (finish - start) * 8 + foffset - soffset # 8 is CHAR_BIT.
      else:
