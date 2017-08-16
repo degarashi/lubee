@@ -1,4 +1,4 @@
---<GDBをデバッガとして使うためのパッチ>--
+--<GDBを_GLIBCXX_DEBUGマクロを適用した状態でデバッガとして使うためのパッチ>--
 gdb_fixes.patch を、QtCreatorのdebugging helper(pythonスクリプト)
 が置いてあるディレクトリ(etc. /share/qtcreator/debugger/)
 に適用する。
