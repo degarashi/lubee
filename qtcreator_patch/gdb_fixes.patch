@@ -1,5 +1,5 @@
 diff --git a/dumper.py b/dumper.py
-index 1cc6404..f7dc12d 100644
+index 564b87a..502d0dd 100644
 --- a/dumper.py
 +++ b/dumper.py
 @@ -35,6 +35,7 @@ import time
@@ -10,21 +10,22 @@ index 1cc6404..f7dc12d 100644
  
  if sys.version_info[0] >= 3:
      xrange = range
-@@ -133,6 +134,13 @@ def arrayForms():
+@@ -133,6 +134,14 @@ def arrayForms():
  def mapForms():
      return [CompactMapFormat]
  
-+def lb_SetNative(dst, nv):
++def lb_SetNative(dumper, dst, nv):
 +    dst.native = nv
++    dst.d = dumper
 +    return dst
 +def lb_GetArrayNative(d, ptr, typ):
 +    TP = d.lookupNativeType(typ.name + "*")
 +    A = gdb.Value(ptr).cast(TP)
-+    return lb_SetNative(d.createValue(ptr, typ), A.dereference())
++    return lb_SetNative(d, d.createValue(ptr, typ), A.dereference())
  
  class ReportItem:
      """
-@@ -2176,7 +2184,8 @@ class DumperBase:
+@@ -2184,7 +2193,8 @@ class DumperBase:
              with Children(self, n, innerType, childNumChild, maxNumChild,
                      addrBase=addrBase, addrStep=innerSize):
                  for i in self.childRange():
@@ -34,7 +35,7 @@ index 1cc6404..f7dc12d 100644
  
      def putArrayItem(self, name, addr, n, typeName):
          self.checkIntType(addr)
-@@ -2845,6 +2854,7 @@ class DumperBase:
+@@ -2856,6 +2866,7 @@ class DumperBase:
              self.targetValue = None # For references.
              self.isBaseClass = None
              self.nativeValue = None
@@ -42,7 +43,7 @@ index 1cc6404..f7dc12d 100644
  
          def copy(self):
              val = self.dumper.Value(self.dumper)
-@@ -2859,6 +2869,7 @@ class DumperBase:
+@@ -2870,6 +2881,7 @@ class DumperBase:
              val.lbitsize = self.lbitsize
              val.targetValue = self.targetValue
              val.nativeValue = self.nativeValue
@@ -50,38 +51,38 @@ index 1cc6404..f7dc12d 100644
              return val
  
          def check(self):
-@@ -2944,7 +2955,7 @@ class DumperBase:
+@@ -2993,7 +3005,7 @@ class DumperBase:
              if self.type.code == TypeCodeTypedef:
                  return self.findMemberByName(self.detypedef())
              if self.type.code in (TypeCodePointer, TypeCodeReference):
 -                res = self.dereference().findMemberByName(name)
-+                res = lb_SetNative(self.dereference(), self.native.dereference()).findMemberByName(name)
++                res = lb_SetNative(self.dumper, self.dereference(), self.native.dereference()).findMemberByName(name)
                  if res is not None:
                      return res
              if self.type.code == TypeCodeStruct:
-@@ -2988,10 +2999,10 @@ class DumperBase:
+@@ -3037,10 +3049,10 @@ class DumperBase:
              elif self.dumper.isInt(index):
                  if self.type.code == TypeCodeArray:
                      addr = self.laddress + int(index) * self.type.ltarget.size()
 -                    return self.dumper.createValue(addr, self.type.ltarget)
-+                    return lb_SetNative(self.dumper.createValue(addr, self.type.ltarget), self.native[index])
++                    return lb_SetNative(self.dumper, self.dumper.createValue(addr, self.type.ltarget), self.native[index])
                  if self.type.code == TypeCodePointer:
                      addr = self.pointer() + int(index) * self.type.ltarget.size()
 -                    return self.dumper.createValue(addr, self.type.ltarget)
-+                    return lb_SetNative(self.dumper.createValue(addr, self.type.ltarget), self.native[index])
++                    return lb_SetNative(self.dumper, self.dumper.createValue(addr, self.type.ltarget), self.native[index])
                  return self.members(False)[index]
              else:
                  error('BAD INDEX TYPE %s' % type(index))
-@@ -3030,7 +3041,7 @@ class DumperBase:
+@@ -3079,7 +3091,7 @@ class DumperBase:
                      val.laddress = self.laddress
                  if self.ldata is not None:
                      val.ldata = self.ldata
 -                return val
-+                return lb_SetNative(val, self.native)
++                return lb_SetNative(self.dumper, val, self.native)
  
              fieldBitsize = field.bitsize
              fieldSize = (fieldBitsize + 7) // 8
-@@ -3066,6 +3077,12 @@ class DumperBase:
+@@ -3115,6 +3127,12 @@ class DumperBase:
                  if val.laddress is not None:
                      val = self.dumper.createReferenceValue(val.laddress, fieldType.ltarget)
                      val.name = field.name
@@ -94,44 +95,44 @@ index 1cc6404..f7dc12d 100644
  
              #warn('GOT VAL %s FOR FIELD %s' % (val, field))
              val.lbitsize = fieldBitsize
-@@ -3096,7 +3113,7 @@ class DumperBase:
+@@ -3145,7 +3163,7 @@ class DumperBase:
              for field in fields:
                  if isinstance(field, self.dumper.Value):
                      #warn("USING VALUE DIRECTLY %s" % field.name)
 -                    res.append(field)
-+                    res.append(lb_SetNative(field, self.native[field.name]))
++                    res.append(lb_SetNative(self.dumper, field, self.native[field.name]))
                      continue
                  if field.isBase and not includeBases:
                      #warn("DROPPING BASE %s" % field.name)
-@@ -3129,7 +3146,7 @@ class DumperBase:
+@@ -3178,7 +3196,7 @@ class DumperBase:
          def dereference(self):
              self.check()
              if self.type.code == TypeCodeTypedef:
 -                return self.detypedef().dereference()
-+                return lb_SetNative(self.detypedef().dereference(), self.native.dereference())
++                return lb_SetNative(self.dumper, self.detypedef().dereference(), self.native.dereference())
              val = self.dumper.Value(self.dumper)
              if self.type.code == TypeCodeReference:
                  if self.nativeValue is None:
-@@ -3152,7 +3169,7 @@ class DumperBase:
+@@ -3201,7 +3219,7 @@ class DumperBase:
              #dynTypeName = val.type.dynamicTypeName(val.laddress)
              #if dynTypeName is not None:
              #    val.type = self.dumper.createType(dynTypeName)
 -            return val
-+            return lb_SetNative(val, self.native)
++            return lb_SetNative(self.dumper, val, self.native)
  
          def detypedef(self):
              self.check()
-@@ -3189,7 +3206,7 @@ class DumperBase:
+@@ -3238,7 +3256,7 @@ class DumperBase:
              val.lbitsize = self.lbitsize
              val.ldata = self.ldata
              val.type = self.dumper.createType(typish)
 -            return val
-+            return lb_SetNative(val, self.native.cast(self.d.lookupNativeType(typish.name)))
++            return lb_SetNative(self.dumper, val, self.native.cast(self.d.lookupNativeType(typish.name)))
  
          def address(self):
              self.check()
 diff --git a/gdbbridge.py b/gdbbridge.py
-index b5bc121..aaa1125 100644
+index 0f171a4..baa405f 100644
 --- a/gdbbridge.py
 +++ b/gdbbridge.py
 @@ -225,6 +225,7 @@ class Dumper(DumperBase):
@@ -167,7 +168,7 @@ index b5bc121..aaa1125 100644
          val.lIsInScope = not nativeValue.is_optimized_out
          code = nativeType.code
 diff --git a/stdtypes.py b/stdtypes.py
-index 30bb2e1..9f2b436 100644
+index cf8b976..31d2601 100644
 --- a/stdtypes.py
 +++ b/stdtypes.py
 @@ -69,8 +69,12 @@ def qdump__std__deque(d, value):
