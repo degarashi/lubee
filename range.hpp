@@ -12,7 +12,7 @@ namespace lubee {
 											value_t()==value_t()),
 								ExEq = noexcept(from=to,
 												from+=to),
-								is_integral = std::is_integral<T>{};
+								is_integral = static_cast<bool>(std::is_integral<T>{});
 		Range() = default;
 		template <class T2>
 		constexpr Range(const Range<T2>& r) noexcept(ExEq):

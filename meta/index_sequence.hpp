@@ -237,7 +237,7 @@ namespace lubee {
 		// 末端処理 (T0はtuple群の末尾)
 		template <std::size_t Sum, class T0>
 		struct _Combi<Sum, T0> {
-			constexpr static std::size_t t0_size = std::tuple_size<T0>{},					//!< この層における組み合わせ数
+			constexpr static std::size_t t0_size = static_cast<std::size_t>(std::tuple_size<T0>{}),					//!< この層における組み合わせ数
 											size = t0_size,									//!< これを含めた下層の組み合わせ総数
 											upper_size = (t0_size==0) ? 1 : Sum/t0_size;	//!< これより上層の組み合わせ総数
 			// [0...t0_size-1]のシーケンスを上位層の組み合わせ回数分、繰り返す
@@ -249,7 +249,7 @@ namespace lubee {
 			constexpr static std::size_t lower_size = lower::size;							//!< これを含めない下層の組み合わせ総数
 			using lower_index = typename lower::index;
 
-			constexpr static std::size_t t0_size = std::tuple_size<T0>{},					//!< この層における組み合わせ数
+			constexpr static std::size_t t0_size = static_cast<std::size_t>(std::tuple_size<T0>{}),					//!< この層における組み合わせ数
 										size = t0_size * lower_size,						//!< これを含めた下層の組み合わせ総数
 										upper_size = (t0_size==0) ? 1 : Sum/size;			//!< これより上層の組み合わせ総数
 			using index = TupleCat_t<
