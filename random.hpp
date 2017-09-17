@@ -86,12 +86,12 @@ namespace lubee {
 			}
 			//! 一様分布を返すファンクタを作成
 			template <class T, ENABLE_IF(lubee::is_number<T>{})>
-			auto getUniformF(const Range<T>& r) noexcept {
+			RObj<T> getUniformF(const Range<T>& r) noexcept {
 				return RObj<T>(*this, r);
 			}
 			//! 一様分布を返すファンクタを作成
 			template <class T, ENABLE_IF(lubee::is_number<T>{})>
-			auto getUniformF() noexcept {
+			RObj<T> getUniformF() noexcept {
 				return RObj<T>(*this, Dist_t<T>::NumericRange);
 			}
 			//! 指定範囲の一様分布(vmax)
