@@ -17,7 +17,7 @@ namespace lubee {
 
 	template <class... Ts>
 	class Types {
-		private:
+		protected:
 			template <class>
 			struct _CallType {
 				using type = Types<decltype(std::declval<Ts>()())...>;
@@ -157,9 +157,7 @@ namespace lubee {
 			//! 自身の型
 			using type = Types<Ts...>;
 
-			constexpr static int size = sizeof...(Ts),						//!< 型リストの要素数
-								sum = _Sum<Ts...>::result,					//!< 要素のサイズ合計
-								maxsize = IMax<sizeof(Ts)...>::result;		//!< 要素の最大サイズ
+			constexpr static int size = sizeof...(Ts);						//!< 型リストの要素数
 			//! タイプリストの位置に対する比較(LessThan)
 			template <class T0, class T1>
 			using Less = typename ArithmeticT< Find<T0>, Find<T1> >::less;
@@ -187,5 +185,14 @@ namespace lubee {
 			//! タイプ指定による先頭からのサイズ累計
 			template <class T, template <class> class Getter=_GetSize_Normal>
 			constexpr static int SumT = _SumT<T, Getter, Ts...>::result;
+	};
+	template <class... Ts>
+	class TypesS : public Types<Ts...> {
+		private:
+			using base_t = Types<Ts...>;
+			using S = typename base_t::template _Sum<Ts...>;
+		public:
+			constexpr static int sum = S::result,						//!< 要素のサイズ合計
+								maxsize = IMax<sizeof(Ts)...>::result;	//!< 要素の最大サイズ
 	};
 }
