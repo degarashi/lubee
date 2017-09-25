@@ -35,17 +35,16 @@ namespace lubee {
 			template <class T>
 			class RObj {
 				private:
-					Random&			_rd;
-					const Range<T>	_range;
+					Random*		_rd;
+					Range<T>	_range;
 				public:
 					RObj(Random& rd, const Range<T>& r):
-						_rd(rd),
+						_rd(&rd),
 						_range(r)
 					{}
-					RObj(const RObj&) = default;
 					//! 実行時範囲指定
 					auto operator ()(const Range<T>& r) const {
-						return _rd.template getUniform<T>(r);
+						return _rd->template getUniform<T>(r);
 					}
 					//! デフォルト範囲指定
 					auto operator ()() const {
