@@ -50,11 +50,11 @@ namespace lubee {
 	HasMethod_name<class_name>() -> std::true_type or std::false_type */
 #define DEF_HASMETHOD_OV(name, ...) \
 	template <class T, class... Args> \
-	auto CheckMethod_##name() -> std::integral_constant<bool, !std::is_same<::lubee::none_t, decltype(std::declval<T>().method(std::declval<Args>()...))>::value>; \
+	auto CheckMethod_##name() -> std::integral_constant<bool, !std::is_same<::lubee::none_t, decltype(std::declval<T>().name(std::declval<Args>()...))>::value>; \
 	template <class T> \
 	auto HasMethod_##name() -> decltype(CheckMethod_##name<T, __VA_ARGS__>()); \
 	template <class T> \
-	using HasMethod_##name##_t = decltype(HasMethod_##method<T>(nullptr));
+	using HasMethod_##name##_t = decltype(HasMethod_##name<T>(nullptr));
 
 //! クラスが特定の名前の定数値を持っているかチェック
 /*! DEF_HASTYPE(type_name)
