@@ -1,3 +1,4 @@
+#pragma once
 #include <gtest/gtest.h>
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/json.hpp>
