@@ -5,17 +5,17 @@
 #include <utility>
 
 namespace lubee {
-	//! コンパイル時定数で数値のN*10乗を計算
-	template <class T, int N, ENABLE_IF((N==0))>
-	constexpr T ConstantPow10(T value=1, IConst<N>* =nullptr) {
+	//! コンパイル時定数で数値のN*p乗を計算
+	template <int N, class T, ENABLE_IF((N==0))>
+	constexpr T ConstantPow(T /*p*/, const T value=1, IConst<N>* =nullptr) {
 		return value;
 	}
-	template <class T, int N, ENABLE_IF((N<0))>
-	constexpr T ConstantPow10(T value=1, IConst<N>* =nullptr) {
-		return ConstantPow10(value/10, (IConst<N+1>*)nullptr);
+	template <int N, class T, ENABLE_IF((N<0))>
+	constexpr T ConstantPow(const T p, const T value=1, IConst<N>* =nullptr) {
+		return ConstantPow(p, value/p, (IConst<N+1>*)nullptr);
 	}
-	template <class T, int N, ENABLE_IF((N>0))>
-	constexpr T ConstantPow10(T value=1, IConst<N>* =nullptr) {
-		return ConstantPow10(value*10, (IConst<N-1>*)nullptr);
+	template <int N, class T, ENABLE_IF((N>0))>
+	constexpr T ConstantPow(const T p, const T value=1, IConst<N>* =nullptr) {
+		return ConstantPow(p, value*p, (IConst<N-1>*)nullptr);
 	}
 }
