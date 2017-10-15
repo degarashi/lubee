@@ -5,17 +5,25 @@
 #include <utility>
 
 namespace lubee {
+	namespace {
+		namespace _pow {
+			using Value = int64_t;
+			template <Value N>
+			using Const = std::integral_constant<Value, N>;
+		}
+	}
 	//! コンパイル時定数で数値のN*p乗を計算
-	template <int N, class T, ENABLE_IF((N==0))>
-	constexpr T ConstantPow(T /*p*/, const T value=1, IConst<N>* =nullptr) {
+	template <_pow::Value N, ENABLE_IF((N==_pow::Value(0)))>
+	constexpr _pow::Value ConstantPow(_pow::Value /*p*/, const _pow::Value value=1, _pow::Const<N>* =nullptr) {
 		return value;
 	}
-	template <int N, class T, ENABLE_IF((N<0))>
-	constexpr T ConstantPow(const T p, const T value=1, IConst<N>* =nullptr) {
-		return ConstantPow(p, value/p, (IConst<N+1>*)nullptr);
+	template <_pow::Value N, ENABLE_IF((N<_pow::Value(0)))>
+	constexpr _pow::Value ConstantPow(const _pow::Value p, const _pow::Value value=1, _pow::Const<N>* =nullptr) {
+		return ConstantPow(p, value/p, (_pow::Const<N+1>*)nullptr);
 	}
-	template <int N, class T, ENABLE_IF((N>0))>
-	constexpr T ConstantPow(const T p, const T value=1, IConst<N>* =nullptr) {
-		return ConstantPow(p, value*p, (IConst<N-1>*)nullptr);
+	template <_pow::Value N, ENABLE_IF((N>_pow::Value(0)))>
+	constexpr _pow::Value ConstantPow(const _pow::Value p, const _pow::Value value=1, _pow::Const<N>* =nullptr) {
+		return ConstantPow(p, value*p, (_pow::Const<N-1>*)nullptr);
 	}
+	namespace _pow {}
 }
