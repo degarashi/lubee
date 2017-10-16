@@ -32,6 +32,7 @@ namespace lubee {
 			template <class T>
 			using Dist_t = decltype(DetectDist<T>());
 		public:
+			using result_type = typename MT_t::result_type;
 			template <class T>
 			class RObj {
 				private:
@@ -52,7 +53,12 @@ namespace lubee {
 					}
 			};
 		public:
-			Random(MT_t mt) noexcept: _mt(std::move(mt)) {}
+			Random(const result_type& r):
+				_mt(r)
+			{}
+			Random(MT_t mt) noexcept:
+				_mt(std::move(mt))
+			{}
 			Random(const Random&) = delete;
 			Random(Random&& t) noexcept {
 				*this = std::move(t);
