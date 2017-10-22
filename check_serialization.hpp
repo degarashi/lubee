@@ -29,8 +29,8 @@ namespace lubee {
 		_CheckSerializationImpl<cereal::JSONOutputArchive,
 								cereal::JSONInputArchive>(ptr0, ptr1, cmp);
 	}
-	template <class PTR, class CMP>
-	void _CheckSerialization(const PTR& ptr0, PTR& ptr1, const CMP& cmp) {
+	template <class PTR, class CMP = std::equal_to<>>
+	void CheckSerialization(const PTR& ptr0, PTR& ptr1, const CMP& cmp = CMP()) {
 		_CheckSerializationBin(ptr0, ptr1, cmp);
 		_CheckSerializationJSON(ptr0, ptr1, cmp);
 	}
@@ -39,11 +39,11 @@ namespace lubee {
 		using Up = std::unique_ptr<T>;
 		Up ptr0(new T(src)),
 		   ptr1;
-		_CheckSerialization(ptr0, ptr1, cmp);
+		CheckSerialization(ptr0, ptr1, cmp);
 	}
 	template <class T, class CMP = std::equal_to<>>
 	void CheckSerialization(const std::shared_ptr<T>& sp, const CMP& cmp = CMP()) {
 		std::shared_ptr<T> sp1;
-		_CheckSerialization(sp, sp1, cmp);
+		CheckSerialization(sp, sp1, cmp);
 	}
 }
