@@ -14,8 +14,8 @@ namespace lubee {
 
 		constexpr static bool ExCmp = noexcept(std::declval<value_t>() < std::declval<value_t>(),
 											std::declval<value_t>() == std::declval<value_t>()),
-								ExEq = noexcept(width=height,
-												width+=height),
+								ExEq = noexcept(noexcept(std::declval<value_t&>()=std::declval<value_t>()) &&
+												noexcept(std::declval<value_t&>()+=std::declval<value_t>())),
 								is_integral = std::is_integral<T>{};
 		Size() = default;
 		Size(const T& s) noexcept(ExEq):

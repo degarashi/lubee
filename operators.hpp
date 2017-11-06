@@ -4,17 +4,19 @@
 
 namespace lubee {
 	namespace op {
-		#define _NOEXCEPT(e) noexcept((Self&)std::declval<Self>() e (T&)std::declval<T>())
+		#define _NOEXCEPT(e) noexcept(std::declval<Self&>() e std::declval<T&>())
 		#define NOEXCEPT(e) noexcept(_NOEXCEPT(e))
 		#define NOEXCEPT_2(e, e2) noexcept(_NOEXCEPT(e) && _NOEXCEPT(e2))
 		#define DEF_OP(op) \
 			template <class T> \
-			auto& operator op##= (const T& t) & NOEXCEPT(op) { \
+			auto operator op##= (const T& t) & NOEXCEPT(op) -> \
+				decltype(std::declval<Self&>() = (std::declval<Self&>() op std::declval<const T&>())) \
+			{ \
 				auto& self = static_cast<Self&>(*this); \
 				return self = self op t; \
 			} \
 			template <class T> \
-			auto&& operator op##= (const T& t) && NOEXCEPT(op##=) { \
+			decltype(auto) operator op##= (const T& t) && NOEXCEPT(op##=) { \
 				return std::move(*this op##= t); \
 			} \
 			template <class T> \
