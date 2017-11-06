@@ -239,7 +239,7 @@ namespace lubee {
 				return _value < v._value;
 			}
 			#define DEF_OP(op) \
-				auto operator op (const PowValue& v) const noexcept { \
+				PowValue operator op (const PowValue& v) const noexcept { \
 					return _value op v._value; }
 			DEF_OP(+)
 			DEF_OP(-)
