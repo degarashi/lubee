@@ -8,7 +8,7 @@ namespace lubee {
 	//! 浮動少数点数の値がNaNになっているか
 	template <class T, ENABLE_IF((std::is_floating_point<T>{}))>
 	bool IsNaN(const T& val) {
-		return !(val>=T(0)) && !(val<T(0));
+		return std::isnan(val);
 	}
 	//! 浮動少数点数の値がNaN又は無限大になっているか
 	template <class T, ENABLE_IF((std::is_floating_point<T>{}))>
