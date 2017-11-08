@@ -61,20 +61,25 @@ namespace lubee {
 		#define EChk_d				::lubee::detail::EChk
 	#else
 		#define EChk_d(...)
-		// ----- エラーチェック無し(非デバッグモード時) -----
-		template <class Act, class Chk, class Func, class... Ts>
-		auto EChk_polling_d(Chk&&, const SourcePos&, Func&& func, Ts&&... ts) {
-			return func(std::forward<Ts>(ts)...);
+		namespace detail {
+			// ----- エラーチェック無し(非デバッグモード時) -----
+			template <class Act, class Chk, class Func, class... Ts>
+			auto EChk_polling_pass(Chk&&, const SourcePos&, Func&& func, Ts&&... ts) {
+				return func(std::forward<Ts>(ts)...);
+			}
+			template <class Act, class Chk>
+			void EChk_polling_pass(Chk&&, const SourcePos&) {}
+			template <class Act, class... Ts>
+			auto EChk_return_pass(Ts&&... ts) {
+				return EChk_polling_pass<Act>(std::forward<Ts>(ts)...);
+			}
+			template <class Act, class Chk, class CODE>
+			auto EChk_usercode_pass(Chk&&, const SourcePos&, const CODE& code) {
+				return code;
+			}
 		}
-		template <class Act, class Chk>
-		void EChk_polling_d(Chk&&, const SourcePos&) {}
-		template <class Act, class... Ts>
-		auto EChk_return_d(Ts&&... ts) {
-			return EChk_polling_d<Act>(std::forward<Ts>(ts)...);
-		}
-		template <class Act, class Chk, class CODE>
-		auto EChk_usercode_d(Chk&&, const SourcePos&, const CODE& code) {
-			return code;
-		}
+		#define EChk_polling_d		::lubee::detail::EChk_polling_pass
+		#define EChk_return_d		::lubee::detail::EChk_return_pass
+		#define EChk_usercode_d		::lubee::detail::EChk_usercode_pass
 	#endif
 }
