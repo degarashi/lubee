@@ -55,6 +55,12 @@ namespace lubee {
 		operator value_t& () noexcept {
 			return _value;
 		}
+		value_t* operator -> () noexcept {
+			return &_value;
+		}
+		const value_t* operator -> () const noexcept {
+			return &_value;
+		}
 		bool operator == (const value_t& t) const noexcept {
 			return _value == t;
 		}
