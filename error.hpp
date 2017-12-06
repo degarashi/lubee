@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <sstream>
 #include "output.hpp"
+#include "meta/enable_if.hpp"
 
 #define AssertBase(typ, exp, ...) \
 	if(!(exp)) { \
@@ -125,71 +126,71 @@ namespace lubee {
 				}
 			}
 	};
-	template <class T=void>
-	struct ScopeHolder {
-		struct Scope {
-			const char*	name;
-			SourcePos	pos;
-		};
-		thread_local static Scope tls_scope;
-	};
-	template <class T=void>
-	constexpr SourcePos TopLevelSPos{"[no filename]", "[no function]", "[no function]", 0};
-	template <class T>
-	thread_local typename ScopeHolder<T>::Scope ScopeHolder<T>::tls_scope{"[top level]", TopLevelSPos<>};
-
-	inline void PrintException(std::ostream& os, const int indent=0) {
-		os << std::string(indent*4, ' ') << "(unknown exception)" << std::endl;
-	}
-	inline void PrintException(std::ostream& os, const std::exception& e, const int indent=0) {
-		os << std::string(indent*4, ' ') << "std::exception: " << e.what() << std::endl;
-	}
-	inline void PrintNestedException(std::ostream& os, const std::exception& e, const int indent=0) {
-		os << std::string(indent*4, ' ') << "exception: " << e.what() << std::endl;
+	#define DEF_CATCH(typ)	catch(typ t) { cb(t); }
+	// 現在投げられている例外をすべてキャッチしてコールバック関数の引数とする
+	template <class T, class CB>
+	void CatchAll(CB&& cb) {
 		try {
-			std::rethrow_if_nested(e);
-		} catch(const std::exception& e) {
-			PrintNestedException(os, e, indent+1);
-		} catch(...) {
-			PrintException(os, indent+1);
+			throw;
+		} catch(const T& t) {
+			cb(t);
 		}
+		DEF_CATCH(uint64_t)
+		DEF_CATCH(uint32_t)
+		DEF_CATCH(uint16_t)
+		DEF_CATCH(uint8_t)
+		DEF_CATCH(int64_t)
+		DEF_CATCH(int32_t)
+		DEF_CATCH(int16_t)
+		DEF_CATCH(int8_t)
+		DEF_CATCH(float)
+		DEF_CATCH(double)
+		DEF_CATCH(bool)
+		DEF_CATCH(void*)
+		catch(...) { cb("(unknown exception)"); }
 	}
+	// std::exceptionベースの引数ならwhat()を印字、そうでなければそのままstd::ostreamへ渡す
+	template <class T, ENABLE_IF(!(std::is_base_of<std::exception, T>::value))>
+	void PrintException(std::ostream& os, const T& t) {
+		os << "(unknown type): " << t;
+	}
+	template <class T, ENABLE_IF((std::is_base_of<std::exception, T>::value))>
+	void PrintException(std::ostream& os, const T& t) {
+		os << "(std::exception based): " << t.what();
+	}
+	#undef DEF_CATCH
 	class ExceptionScope {
 		private:
-			using SH = ScopeHolder<>;
-			using Scope = typename SH::Scope;
-			Scope			_prevScope;
+			const char*	name;
+			SourcePos	pos;
 		public:
-			ExceptionScope(const char* msg, const SourcePos& pos):
-				_prevScope(SH::tls_scope)
-			{
-				SH::tls_scope = Scope{msg, pos};
-			}
-			~ExceptionScope() noexcept(false) {
-				if(!std::uncaught_exception())
-					SH::tls_scope = _prevScope;
+			ExceptionScope(const char* name, const SourcePos& pos):
+				name(name),
+				pos(pos)
+			{}
+			void log() const {
+				std::stringstream ss;
+				ss << "exception pass through(" << name << "): at\n";
+				ss << pos << std::endl;
+				CatchAll<std::exception>([&ss](const auto& e){
+					PrintException(ss, e);
+				});
+				ss << std::endl;
+				Log(Info, ss.str().c_str());
 			}
 	};
 }
-#if defined(DEBUG) && defined(THROW_ON_FAILURE)
-	#define D_Scope(name) try { ::lubee::ExceptionScope scope_##__LINE__(name, SOURCEPOS);
-	#define D_ScopeEnd() } catch(const ::lubee::AssertionFailed& e) { \
-		const auto& s = ::lubee::ScopeHolder<>::tls_scope; \
-		std::throw_with_nested(::lubee::AssertionFailed(s.name, s.pos, SOURCEPOS)); \
-	}
+#if defined(DEBUG)
+	#define D_Scope(name) { ::lubee::ExceptionScope _exc_scope(#name, SOURCEPOS); try{
+	#define D_ScopeEnd() } catch(...) { _exc_scope.log(); throw; } }
+	// 一番目の関数を呼んだ時の例外を全てキャッチしてコールバック関数の引数にする
 	namespace lubee {
-		template <class CB, class... Ts>
-		void CallMain(std::ostream& os, CB&& cb, Ts&&... ts) {
+		template <class Target, class CB, class CBE>
+		void TryAndCatchAll(CB&& cb, CBE&& cbe) {
 			try {
-				cb(std::forward<Ts>(ts)...);
+				cb();
 			} catch(...) {
-				try {
-					std::rethrow_exception(std::current_exception());
-				} catch(const std::exception& e) {
-					PrintNestedException(os, e);
-				} catch(...) {
-					PrintException(os);
-				}
+				CatchAll<Target>(cbe);
 			}
 		}
 	}
@@ -197,9 +198,9 @@ namespace lubee {
 	#define D_Scope(name) {
 	#define D_ScopeEnd() }
 	namespace lubee {
-		template <class CB, class... Ts>
-		void CallMain(std::ostream&, CB&& cb, Ts&&... ts) {
-			cb(std::forward<Ts>(ts)...);
+		template <class Target, class CB, class CBE>
+		void TryAndCatchAll(std::ostream&, CB&& cb, CBE&& /*cbe*/) {
+			cb();
 		}
 	}
 #endif
