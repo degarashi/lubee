@@ -2,7 +2,7 @@
 #include "meta/enable_if.hpp"
 #include "bit.hpp"
 #include <cmath>
-#include <iostream>
+#include <ostream>
 
 namespace lubee {
 	//! 任意の型の縦横サイズ
