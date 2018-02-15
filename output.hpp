@@ -28,6 +28,7 @@ namespace lubee {
 		struct Output {
 			virtual void print(Type::e type, const std::string& msg) = 0;
 			virtual void print(Type::e type, const SourcePos& pos, const std::string& msg) = 0;
+			virtual ~Output() {}
 		};
 		struct DefaultOutput : Output {
 			void print(const Type::e type, const std::string& msg) override {
