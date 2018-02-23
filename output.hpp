@@ -22,7 +22,8 @@ namespace lubee {
 			enum e {
 				Error,
 				Info,
-				Verbose
+				Verbose,
+				_Num
 			};
 		};
 		struct Output {
@@ -30,37 +31,30 @@ namespace lubee {
 			virtual void print(Type::e type, const SourcePos& pos, const std::string& msg) = 0;
 			virtual ~Output() {}
 		};
-		struct DefaultOutput : Output {
-			void print(const Type::e type, const std::string& msg) override {
-				switch(type) {
-					case Type::Error:
-						#ifdef ANDROID
-							LOGE(msg.c_str());
-						#else
-							std::cerr << "<Error> " << msg << std::endl;
-						#endif
-						break;
-					case Type::Info:
-						#ifdef ANDROID
-							LOGI(msg.c_str());
-						#else
-							std::cerr << "<Info> " << msg << std::endl;
-						#endif
-						break;
-					case Type::Verbose:
-						#ifdef ANDROID
-							LOGV(msg.c_str());
-						#elif not defined(NDEBUG)
-							std::cout << "<Verbose> " << msg << std::endl;
-						#endif
-						break;
+		class DefaultOutput : public Output {
+			protected:
+				using ProcLog = std::function<void (const std::string&)>;
+				ProcLog		_proc[Type::_Num] =
+				{
+					#ifdef ANDROID
+						[](const auto& str){ LOGE(msg.c_str()); },
+						[](const auto& str){ LOGI(msg.c_str()); },
+						[](const auto& str){ LOGV(msg.c_str()); }
+					#else
+						[](const auto& str){ std::cerr << "<Error> " << str << std::endl; },
+						[](const auto& str){ std::cerr << "<Info> " << str << std::endl; },
+						[](const auto& str){ std::cout << "<Verbose> " << str << std::endl; }
+					#endif
+				};
+			public:
+				void print(const Type::e type, const std::string& msg) override {
+					_proc[type](msg);
 				}
-			}
-			void print(const Type::e type, const SourcePos& pos, const std::string& msg) override {
-				std::stringstream ss;
-				ss << pos << std::endl << msg;
-				print(type, ss.str());
-			}
+				void print(const Type::e type, const SourcePos& pos, const std::string& msg) override {
+					std::stringstream ss;
+					ss << pos << std::endl << msg;
+					print(type, ss.str());
+				}
 		};
 		class Log {
 			private:
