@@ -10,22 +10,22 @@ namespace lubee {
 		if(std::distance(itrB, itrE) < 2)
 			return;
 
-		// ソート済のカーソル
-		Itr curLE = std::next(itrB);
+		// ソート済のカーソル(直前までがソート済み)
+		Itr sortEnd = std::next(itrB);
 		for(;;) {
-			Itr curL1 = curLE,
-				curL0 = std::prev(curL1);
-			auto tmp = std::move(*curL1);
-			while(!cmp(*curL0, tmp)) {
-				*curL1 = std::move(*curL0);
-				--curL1;
-				if(curL0 == itrB)
+			Itr r = sortEnd,
+				l = std::prev(r);
+			auto tmp = std::move(*r);
+			while(cmp(tmp, *l)) {
+				*r = std::move(*l);
+				--r;
+				if(l == itrB)
 					break;
-				--curL0;
+				--l;
 			}
-			*curL1 = std::move(tmp);
+			*r = std::move(tmp);
 			// ソート済みカーソルがリストの最後まで達したら終了
-			if(++curLE == itrE)
+			if(++sortEnd == itrE)
 				break;
 		}
 	}
