@@ -4,6 +4,7 @@
 #include <memory>
 #include <iostream>
 #include <sstream>
+#include <functional>
 
 #ifdef ANDROID
 	#include <android/log.h>

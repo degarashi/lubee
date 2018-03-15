@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <random>
 
 namespace lubee {
 	template <class MT>
