@@ -77,16 +77,12 @@ namespace lubee {
 		return t0 != t1._value;
 	}
 
+	// lubee::Wrapper<T>の内部値Tを取得
 	template <class T>
-	inline decltype(auto) wrapper_value(const T& v, std::true_type) noexcept {
-		return v._value;
-	}
-	template <class T>
-	inline decltype(auto) wrapper_value(const T& v, std::false_type) noexcept {
-		return v;
-	}
-	template <class T>
-	inline decltype(auto) wrapper_value(const T& v) noexcept {
-		return wrapper_value(v, is_wrapper_t<T>());
+	inline decltype(auto) UnwrapValue(const T& v) noexcept {
+		if constexpr(is_wrapper_t<T>{})
+			return v._value;
+		else
+			return v;
 	}
 }
