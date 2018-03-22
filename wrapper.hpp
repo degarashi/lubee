@@ -79,10 +79,10 @@ namespace lubee {
 
 	// lubee::Wrapper<T>の内部値Tを取得
 	template <class T>
-	inline decltype(auto) UnwrapValue(const T& v) noexcept {
-		if constexpr(is_wrapper_t<T>{})
-			return v._value;
+	inline decltype(auto) UnwrapValue(T&& v) noexcept {
+		if constexpr(is_wrapper_t<std::decay_t<T>>{})
+			return std::forward<T>(v)._value;
 		else
-			return v;
+			return std::forward<T>(v);
 	}
 }
