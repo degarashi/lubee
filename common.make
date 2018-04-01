@@ -1,7 +1,7 @@
 PWD					:= $(shell pwd)
 WORK_DIR			:= /var/tmp/$(LIB_NAME)
 
-JOBS				?= 5
+JOBS				?= $(shell expr $(shell nproc) + 1)
 BUILD_TYPE			?= Debug
 CXX					?= g++
 
