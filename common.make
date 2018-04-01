@@ -37,3 +37,5 @@ clean:
 tags:
 	@ctags -R -f ./.git/ctags .
 	@cscope -b -f ./.git/cscope.out
+test:
+	cd $(WORK_DIR); pwd; ctest -j$(JOBS);
