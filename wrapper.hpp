@@ -5,12 +5,15 @@
 namespace lubee {
 	template <class T>
 	struct Wrapper;
-	template <class T>
-	std::false_type is_wrapper(T*);
-	template <class T>
-	std::true_type is_wrapper(Wrapper<T>*);
-	template <class T>
-	using is_wrapper_t = decltype(is_wrapper((T*)nullptr));
+
+	namespace detail {
+		template <class T>
+		std::false_type is_wrapper(T*);
+		template <class T>
+		std::true_type is_wrapper(Wrapper<T>*);
+		template <class T>
+		using is_wrapper_t = decltype(is_wrapper((T*)nullptr));
+	}
 
 	template <class T>
 	struct Wrapper {
@@ -27,7 +30,7 @@ namespace lubee {
 		explicit Wrapper(A0&& a0, Args&&... args):
 			_value(std::forward<A0>(a0), std::forward<Args>(args)...)
 		{}
-		template <class A, ENABLE_IF(!is_wrapper_t<A>{})>
+		template <class A, ENABLE_IF(!detail::is_wrapper_t<A>{})>
 		explicit Wrapper(A&& arg):
 			_value(std::forward<A>(arg))
 		{}
@@ -80,7 +83,7 @@ namespace lubee {
 	// lubee::Wrapper<T>の内部値Tを取得
 	template <class T>
 	inline decltype(auto) UnwrapValue(T&& v) noexcept {
-		if constexpr(is_wrapper_t<std::decay_t<T>>{})
+		if constexpr(detail::is_wrapper_t<std::decay_t<T>>{})
 			return std::forward<T>(v)._value;
 		else
 			return std::forward<T>(v);
