@@ -9,7 +9,7 @@ namespace lubee {
 		seed ^= std::hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 	}
 
-	void hash_combine(std::size_t&) noexcept {}
+	inline void hash_combine(std::size_t&) noexcept {}
 	template <class T0, class... Ts>
 	void hash_combine(std::size_t& seed, const T0& t, const Ts&... ts) noexcept {
 		hash_combine_single(seed, t);
