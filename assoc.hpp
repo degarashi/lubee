@@ -1,5 +1,6 @@
 #pragma once
 #include "sort.hpp"
+#include "hash_combine.hpp"
 #include "operators.hpp"
 #include <vector>
 
@@ -39,6 +40,12 @@ namespace lubee {
 				_vec(std::forward<Vec>(src))
 			{
 				std::sort(_vec.begin(), _vec.end());
+			}
+			std::size_t getHash() const noexcept {
+				std::size_t h;
+				for(auto& v : _vec)
+					hash_combine(h, v);
+				return h;
 			}
 
 			bool operator == (const AssocVec& av) const {
@@ -167,5 +174,13 @@ namespace lubee {
 			typename ASV::VecItrC cend() const {
 				return ASV::_cend();
 			}
+	};
+}
+namespace std {
+	template <class T, class P, class CT>
+	struct hash<lubee::AssocVec<T,P,CT>> {
+		std::size_t operator()(const lubee::AssocVec<T,P,CT>& a) const noexcept {
+			return a.getHash();
+		}
 	};
 }
