@@ -1,6 +1,7 @@
 #pragma once
 #include "sort.hpp"
 #include "operators.hpp"
+#include <vector>
 
 namespace lubee {
 	//! ソート済みベクタ
