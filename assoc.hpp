@@ -118,8 +118,14 @@ namespace lubee {
 			const T& operator [](const int n) const {
 				return _vec[n];
 			}
+			typename Vec::const_iterator begin() const {
+				return _vec.begin();
+			}
 			typename Vec::const_iterator cbegin() const {
 				return _vec.cbegin();
+			}
+			typename Vec::const_iterator end() const {
+				return _vec.end();
 			}
 			typename Vec::const_iterator cend() const {
 				return _vec.cend();
