@@ -6,8 +6,6 @@ set(CXX_VERSION 17)
 include(cxx_options.cmake)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-c99-extensions")
 
-add_definitions(-DSSE=${SSE})
-
 if(NOT without-test)
 	enable_testing()
 	find_package(Threads REQUIRED)
