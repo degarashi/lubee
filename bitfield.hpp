@@ -30,7 +30,7 @@ namespace lubee {
 					Limits::is_specialized &&
 					Limits::is_integer &&
 					!Limits::is_signed
-				) ? 0 : -1
+				) ? 1 : -1
 			] = {};
 
 		public:
@@ -72,7 +72,7 @@ namespace lubee {
 				Limits::is_specialized &&
 				Limits::is_integer &&
 				!Limits::is_signed
-			) ? 0 : -1
+			) ? 1 : -1
 		] = {};
 
 		using Word = T;
@@ -97,7 +97,7 @@ namespace lubee {
 			using Word = typename BDef::Word;
 		private:
 			// 表現するビット列のサイズがWordより大きかったらコンパイルエラー
-			constexpr static int WordCheck[buffsize > sizeof(Word) ? -1 : 0] = {};
+			constexpr static int WordCheck[buffsize > sizeof(Word) ? -1 : 1] = {};
 
 			template <int N>
 			using BFAt = typename BDef::template At<N>;
