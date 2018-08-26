@@ -4,6 +4,7 @@
 #include "meta/countof.hpp"
 #include "operators.hpp"
 #include "error.hpp"
+#include "point.hpp"
 
 namespace lubee {
 	DEF_HASMETHOD(x)
@@ -43,6 +44,9 @@ namespace lubee {
 				x1(x_0 + size.width),
 				y0(y_0),
 				y1(y_0 + size.height)
+			{}
+			Rect(const Point<T>& pos, const Size<T>& size):
+				Rect(pos.x, pos.y, size)
 			{}
 			static Rect FromSize(const value_t& x0, const value_t& y0, const value_t& w, const value_t& h) {
 				return Rect(x0, x0+w, y0, y0+h);
