@@ -5,6 +5,7 @@
 #include "operators.hpp"
 #include "error.hpp"
 #include "point.hpp"
+#include "compare.hpp"
 
 namespace lubee {
 	DEF_HASMETHOD(x)
@@ -166,6 +167,14 @@ namespace lubee {
 			template <class V>
 			auto toRect() const {
 				return Rect<V>(x0, x1, y0,y1);
+			}
+			Rect clip(const Rect& r) const {
+				return {
+					Saturate(x0, r.x0, r.x1),
+					Saturate(x1, r.x0, r.x1),
+					Saturate(y0, r.y0, r.y1),
+					Saturate(y1, r.y0, r.y1)
+				};
 			}
 			bool operator == (const Rect& r) const {
 				return x0 == r.x0 &&
