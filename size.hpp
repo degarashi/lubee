@@ -113,6 +113,9 @@ namespace lubee {
 		auto toSize() const noexcept(ExEq) {
 			return Size<V>(width, height);
 		}
+		auto area() const noexcept(ExEq) {
+			return width * height;
+		}
 	};
 	template <class T>
 	std::ostream& operator << (std::ostream& os, const ::lubee::Size<T>& s) {
