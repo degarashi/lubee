@@ -103,6 +103,10 @@ namespace lubee {
 			void shrinkTop(const value_t& s) {
 				y0 = std::min(y1, y0+s);
 			}
+			void setSize(const Size<value_t>& s) {
+				x1 = x0 + s.width;
+				y1 = y0 + s.height;
+			}
 			Size<value_t> size() const {
 				return Size<value_t>(width(), height());
 			}
