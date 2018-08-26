@@ -38,6 +38,12 @@ namespace lubee {
 			{
 				D_Assert0(_checkValidness());
 			}
+			Rect(const value_t& x_0, const value_t& y_0, const Size<T>& size):
+				x0(x_0),
+				x1(x_0 + size.width),
+				y0(y_0),
+				y1(y_0 + size.height)
+			{}
 			static Rect FromSize(const value_t& x0, const value_t& y0, const value_t& w, const value_t& h) {
 				return Rect(x0, x0+w, y0, y0+h);
 			}
