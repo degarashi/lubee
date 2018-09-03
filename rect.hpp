@@ -108,6 +108,9 @@ namespace lubee {
 				x1 = x0 + s.width;
 				y1 = y0 + s.height;
 			}
+			Point<value_t> offset() const {
+				return Point<value_t>(x0, y0);
+			}
 			Size<value_t> size() const {
 				return Size<value_t>(width(), height());
 			}
