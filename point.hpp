@@ -1,4 +1,5 @@
 #pragma once
+#include "hash_combine.hpp"
 
 namespace lubee {
 	template <class T>
@@ -32,4 +33,12 @@ namespace lubee {
 	};
 	using PointI = Point<int32_t>;
 	using PointF = Point<float>;
+}
+namespace std {
+	template <class T>
+	struct hash<lubee::Point<T>> {
+		std::size_t operator()(const lubee::Point<T>& p) const noexcept {
+			return lubee::hash_combine_implicit(p.x, p.y);
+		}
+	};
 }
