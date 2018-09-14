@@ -31,16 +31,20 @@ namespace lubee {
 			width(static_cast<value_t>(s.width)),
 			height(static_cast<value_t>(s.height))
 		{}
-		Size& operator *= (const value_t& s) noexcept(ExEq) {
+		template <class T2>
+		Size& operator *= (const T2& s) {
 			return *this = *this * s;
 		}
-		Size& operator /= (const value_t& s) noexcept(ExEq) {
+		template <class T2>
+		Size& operator /= (const T2& s) {
 			return *this = *this / s;
 		}
-		Size operator / (const value_t& s) const noexcept(ExEq) {
+		template <class T2>
+		Size operator / (const T2& s) const {
 			return Size(width/s, height/s);
 		}
-		Size operator * (const T& s) const noexcept(ExEq) {
+		template <class T2>
+		Size operator * (const T2& s) const {
 			return Size(width*s, height*s);
 		}
 		template <class V, ENABLE_IF(std::is_integral<V>{})>
