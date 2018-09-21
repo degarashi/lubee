@@ -16,3 +16,5 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	add_definitions(-D_GLIBCXX_DEBUG)
 	add_definitions(-DDEBUG)
 endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
