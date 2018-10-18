@@ -7,6 +7,10 @@ include(cxx_options.cmake)
 string(CONCAT CMAKE_CXX_FLAGS " -Wno-c99-extensions")
 
 if(NOT without-test)
+	# コンパイル出来るかだけのチェック
+	aux_source_directory(. S_SRC)
+	add_executable(StaticTest ${S_SRC})
+
 	enable_testing()
 	find_package(Threads REQUIRED)
 	find_package(GTest REQUIRED)
