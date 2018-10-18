@@ -1,4 +1,4 @@
-#include "../logical.hpp"
+#include "logical.hpp"
 
 namespace lubee {
 	namespace {
