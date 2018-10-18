@@ -8,7 +8,7 @@ string(CONCAT CMAKE_CXX_FLAGS " -Wno-c99-extensions")
 
 if(NOT without-test)
 	# コンパイル出来るかだけのチェック
-	aux_source_directory(. S_SRC)
+	aux_source_directory(src S_SRC)
 	add_executable(StaticTest ${S_SRC})
 
 	enable_testing()
@@ -16,7 +16,7 @@ if(NOT without-test)
 	find_package(GTest REQUIRED)
 	include_directories(${GTEST_INCLUDE_DIRS})
 	# testsディレクトリ以下のソースが対象
-	aux_source_directory(tests TEST_SRC)
+	aux_source_directory(src/tests TEST_SRC)
 	# 個別にexeを作成
 	foreach(SRC IN LISTS TEST_SRC)
 		GetFileName(${SRC}, SRCNAME)
