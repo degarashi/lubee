@@ -1,4 +1,4 @@
-#include "../arithmetic.hpp"
+#include "arithmetic.hpp"
 #include <cstdint>
 
 namespace lubee {
