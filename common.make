@@ -22,6 +22,7 @@ else
 endif
 
 CMake = mkdir -p $(WORK_DIR); cd $(WORK_DIR); cmake $(PWD) $(Options); $(MAKE_GDBINIT_CMD) $(ADDITIONAL_CMD)
+MakeLink = ln -sf $(WORK_DIR)/compile_commands.json ./
 Make = cd $(WORK_DIR); make -j$(JOBS);
 Clean = cd $(WORK_DIR); make clean; rm -f Makefile CMakeCache.txt;
 
@@ -30,8 +31,10 @@ all: $(WORK_DIR)/Makefile
 	$(call Make)
 cmake:
 	$(call CMake)
+	$(call MakeLink)
 $(WORK_DIR)/Makefile:
 	$(call CMake)
+	$(call MakeLink)
 clean:
 	$(call Clean)
 tags:
