@@ -25,6 +25,12 @@ namespace lubee {
 	using RangeI = Range<int_fast32_t>;
 	using RangeF = Range<float>;
 
+	// (point.hpp)
+	template <class T>
+	struct Point;
+	using PointI = Point<int32_t>;
+	using PointF = Point<float>;
+
 	// (size.hpp)
 	template <class T>
 	struct Size;
