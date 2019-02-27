@@ -30,6 +30,16 @@ namespace lubee {
 		DEF_OP(+)
 		DEF_OP(-)
 		#undef DEF_OP
+		#define DEF_OP(op) \
+			Point operator op (const value_t t) const { \
+				return {x op t, y op t}; } \
+			Point& operator op##= (const value_t t) { \
+				x op##= t; \
+				y op##= t; \
+				return *this; }
+		DEF_OP(*)
+		DEF_OP(/)
+		#undef DEF_OP
 	};
 	using PointI = Point<int32_t>;
 	using PointF = Point<float>;
