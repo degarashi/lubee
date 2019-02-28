@@ -104,6 +104,20 @@ namespace lubee {
 			void shrinkTop(const value_t& s) {
 				y0 = std::min(y1, y0+s);
 			}
+			void setWidth(const value_t& w) {
+				x1 = x0 + w;
+			}
+			void setHeight(const value_t& h) {
+				y1 = y0 + h;
+			}
+			void setOffset(const Point<T> &pos) {
+				const auto w = width(),
+							h = height();
+				x0 = pos.x;
+				y0 = pos.y;
+				setWidth(w);
+				setHeight(h);
+			}
 			void setSize(const Size<value_t>& s) {
 				x1 = x0 + s.width;
 				y1 = y0 + s.height;
