@@ -75,16 +75,29 @@ namespace lubee {
 		}
 		//! 1右ビットシフトした値を2の累乗に合わせる
 		void shiftR_2pow() noexcept(ExEq) {
-			const auto fn = [](const T& t) -> T {
-				using UT = std::make_unsigned_t<T>;
-				UT ut(t);
-				auto v = bit::LowClear(ut);
-				if(v != ut)
-					return v;
-				return v >> 1;
-			};
-			width = fn(width);
-			height = fn(height);
+			if constexpr (is_integral) {
+				const auto fn = [](const value_t& t) -> value_t {
+					using UT = std::make_unsigned_t<T>;
+					const UT ut(t);
+					const auto v = bit::LowClear(ut);
+					if(v != ut)
+						return v;
+					return v >> 1;
+				};
+				width = fn(width);
+				height = fn(height);
+			} else {
+				// 一旦, 整数に直してから演算
+				Size<uint64_t> tmp(
+					std::floor(width),
+					std::floor(height)
+				);
+				tmp.shiftR_2pow();
+
+				// 値をthisに戻す
+				width = value_t(tmp.width);
+				height = value_t(tmp.height);
+			}
 		}
 		bool operator == (const Size& s) const noexcept(ExCmp) {
 			return width == s.width &&
