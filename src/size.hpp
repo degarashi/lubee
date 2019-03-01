@@ -22,16 +22,22 @@ namespace lubee {
 		Size(const T& s) noexcept(ExEq):
 			width(s),
 			height(s)
-		{}
+		{
+			D_Assert0(_checkValidness());
+		}
 		Size(const T& w, const T& h) noexcept(ExEq):
 			width(w),
 			height(h)
-		{}
+		{
+			D_Assert0(_checkValidness());
+		}
 		template <class T2>
 		Size(const Size<T2>& s) noexcept(ExEq):
 			width(static_cast<value_t>(s.width)),
 			height(static_cast<value_t>(s.height))
-		{}
+		{
+			D_Assert0(_checkValidness());
+		}
 		bool _checkValidness() const noexcept {
 			return width>=0 && height>=0;
 		}
