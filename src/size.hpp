@@ -47,7 +47,7 @@ namespace lubee {
 		Size operator * (const T2& s) const {
 			return Size(width*s, height*s);
 		}
-		void shiftR(const int n) noexcept(ExEq) {
+		void shiftR(const size_t n) noexcept(ExEq) {
 			if constexpr (is_integral) {
 				width >>= n;
 				height >>= n;
@@ -55,12 +55,12 @@ namespace lubee {
 				*this *= std::pow(2, n);
 			}
 		}
-		Size& operator >>= (const int n) noexcept(ExEq) {
+		Size& operator >>= (const size_t n) noexcept(ExEq) {
 			shiftR(n);
 			return *this;
 		}
 		//! 指定したビット数分、右シフトしてもし値がゼロになったら1をセットする
-		void shiftR_one(const int n) noexcept(ExEq) {
+		void shiftR_one(const size_t n) noexcept(ExEq) {
 			if constexpr (is_integral) {
 				width >>= n;
 				width |= ~bit::ZeroOrFull(width) & 0x01;
