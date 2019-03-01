@@ -58,6 +58,11 @@ namespace lubee {
 			return Size(width*s, height*s);
 		}
 		void shiftR(const size_t n) noexcept(ExEq) {
+			// 値のbit幅以上のシフトは0で固定
+			if(n >= sizeof(value_t)*8) {
+				*this = {0,0};
+				return;
+			}
 			if constexpr (is_integral) {
 				width >>= n;
 				height >>= n;
@@ -71,6 +76,11 @@ namespace lubee {
 		}
 		//! 指定したビット数分、右シフトしてもし値がゼロになったら1をセットする
 		void shiftR_one(const size_t n) noexcept(ExEq) {
+			// 値のbit幅以上のシフトは0で固定
+			if(n >= sizeof(value_t)*8) {
+				*this = {0,0};
+				return;
+			}
 			if constexpr (is_integral) {
 				width >>= n;
 				width |= ~bit::ZeroOrFull(width) & 0x01;
