@@ -1,6 +1,7 @@
 #pragma once
 #include "meta/enable_if.hpp"
 #include "bit.hpp"
+#include "error.hpp"
 #include <cmath>
 #include <ostream>
 
@@ -31,6 +32,9 @@ namespace lubee {
 			width(static_cast<value_t>(s.width)),
 			height(static_cast<value_t>(s.height))
 		{}
+		bool _checkValidness() const noexcept {
+			return width>=0 && height>=0;
+		}
 		template <class T2>
 		Size& operator *= (const T2& s) {
 			return *this = *this * s;
