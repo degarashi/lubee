@@ -52,7 +52,7 @@ namespace lubee {
 				width >>= n;
 				height >>= n;
 			} else {
-				*this *= std::pow(2, n);
+				*this /= std::pow(2, n);
 			}
 		}
 		Size& operator >>= (const size_t n) noexcept(ExEq) {
