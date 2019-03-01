@@ -47,17 +47,16 @@ namespace lubee {
 		Size operator * (const T2& s) const {
 			return Size(width*s, height*s);
 		}
-		template <class V, ENABLE_IF(std::is_integral<V>{})>
 		void shiftR(const int n) noexcept(ExEq) {
-			width >>= n;
-			height >>= n;
-		}
-		template <class V, ENABLE_IF(!std::is_integral<V>{})>
-		void shiftR(const int n) noexcept(ExEq) {
-			*this *= std::pow(2.f, n);
+			if constexpr (is_integral) {
+				width >>= n;
+				height >>= n;
+			} else {
+				*this *= std::pow(2, n);
+			}
 		}
 		Size& operator >>= (const int n) noexcept(ExEq) {
-			shiftR<value_t>(n);
+			shiftR(n);
 			return *this;
 		}
 		//! 指定したビット数分、右シフトしてもし値がゼロになったら1をセットする
