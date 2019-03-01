@@ -61,10 +61,17 @@ namespace lubee {
 		}
 		//! 指定したビット数分、右シフトしてもし値がゼロになったら1をセットする
 		void shiftR_one(const int n) noexcept(ExEq) {
-			width >>= n;
-			width |= ~bit::ZeroOrFull(width) & 0x01;
-			height >>= n;
-			height |= ~bit::ZeroOrFull(height) & 0x01;
+			if constexpr (is_integral) {
+				width >>= n;
+				width |= ~bit::ZeroOrFull(width) & 0x01;
+				height >>= n;
+				height |= ~bit::ZeroOrFull(height) & 0x01;
+			} else {
+				// 効率は微妙だが、とりあえず
+				shiftR(n);
+				width = std::max<value_t>(1, width);
+				height = std::max<value_t>(1, height);
+			}
 		}
 		//! 1右ビットシフトした値を2の累乗に合わせる
 		void shiftR_2pow() noexcept(ExEq) {
