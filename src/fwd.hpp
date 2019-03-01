@@ -33,7 +33,7 @@ namespace lubee {
 
 	// (size.hpp)
 	template <class T>
-	struct Size;
+	class Size;
 	using SizeI = Size<int32_t>;
 	using SizeF = Size<float>;
 
