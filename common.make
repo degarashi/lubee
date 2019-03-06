@@ -1,6 +1,5 @@
 # Values(required):
 #	LIB_NAME					= 作成しようとしているライブラリ(プログラム)名
-# 	COMMON_MAKE_PATH			= common.makeがある場所への相対パス
 # Values(optional):
 # 	ADDITIONAL_CMAKE_OPTION		= CMakeオプション
 #	ADDITIONAL_CMD				= CMakeタスクを実行した後の追加コマンド
@@ -8,6 +7,9 @@
 # 	JOBS						= 最大ジョブ数
 # 	BUILD_TYPE					= Debug や Release など
 # 	CXX							= コンパイルコマンド
+
+# このファイル(common.make)が置かれているパス
+CURRENT_MAKEDIR_PATH	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 PWD					:= $(shell pwd)
 WORK_DIR			:= /var/tmp/$(LIB_NAME)
@@ -29,7 +31,7 @@ endef
 ifdef MAKE_GDBINIT
 	MAKE_GDBINIT_CMD := \
 		cd $(PWD);\
-		python3 $(COMMON_MAKE_PATH)/make_gdbinit.py $(PWD) $(LIB_NAME) $(WORK_DIR)/.gdbinit;
+		python3 $(CURRENT_MAKEDIR_PATH)/make_gdbinit.py $(PWD) $(LIB_NAME) $(WORK_DIR)/.gdbinit;
 else
 	MAKE_GDBINIT_CMD :=
 endif
