@@ -1,3 +1,14 @@
+# Values(required):
+#	LIB_NAME					= 作成しようとしているライブラリ(プログラム)名
+# 	COMMON_MAKE_PATH			= common.makeがある場所への相対パス
+# Values(optional):
+# 	ADDITIONAL_CMAKE_OPTION		= CMakeオプション
+#	ADDITIONAL_CMD				= CMakeタスクを実行した後の追加コマンド
+# Options:
+# 	JOBS						= 最大ジョブ数
+# 	BUILD_TYPE					= Debug や Release など
+# 	CXX							= コンパイルコマンド
+
 PWD					:= $(shell pwd)
 WORK_DIR			:= /var/tmp/$(LIB_NAME)
 
