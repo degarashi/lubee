@@ -16,15 +16,30 @@ define Options =
 endef
 
 ifdef MAKE_GDBINIT
-	MAKE_GDBINIT_CMD := cd $(PWD); python3 $(COMMON_MAKE_PATH)/make_gdbinit.py $(PWD) $(LIB_NAME) $(WORK_DIR)/.gdbinit;
+	MAKE_GDBINIT_CMD := \
+		cd $(PWD);\
+		python3 $(COMMON_MAKE_PATH)/make_gdbinit.py $(PWD) $(LIB_NAME) $(WORK_DIR)/.gdbinit;
 else
 	MAKE_GDBINIT_CMD :=
 endif
 
-CMake = mkdir -p $(WORK_DIR); cd $(WORK_DIR); cmake $(PWD) $(Options); $(MAKE_GDBINIT_CMD) $(ADDITIONAL_CMD)
+CMake = \
+	mkdir -p $(WORK_DIR);\
+	cd $(WORK_DIR);\
+	cmake $(PWD) $(Options);\
+	$(MAKE_GDBINIT_CMD)\
+	$(ADDITIONAL_CMD)
+
 MakeLink = ln -sf $(WORK_DIR)/compile_commands.json ./
-Make = cd $(WORK_DIR); make -j$(JOBS);
-Clean = cd $(WORK_DIR); make clean; rm -f Makefile CMakeCache.txt;
+
+Make = \
+	cd $(WORK_DIR);\
+	make -j$(JOBS);
+
+Clean = \
+	cd $(WORK_DIR);\
+	make clean;\
+	rm -f Makefile CMakeCache.txt;
 
 .PHONY: cmake clean tags
 all: $(WORK_DIR)/Makefile
@@ -41,4 +56,6 @@ tags:
 	@ctags -R -f ./.git/ctags .
 	@cscope -b -f ./.git/cscope.out
 test:
-	cd $(WORK_DIR); pwd; ctest -j$(JOBS);
+	cd $(WORK_DIR);\
+	pwd;\
+	ctest -j$(JOBS);
