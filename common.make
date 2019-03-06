@@ -7,6 +7,7 @@
 # 	JOBS						= 最大ジョブ数
 # 	BUILD_TYPE					= Debug や Release など
 # 	CXX							= コンパイルコマンド
+# 	MAKE_COMPILECOMMANDS_LINK	= 定義するとcompile_commands.jsonへのリンクをカレントディレクトリに作る
 
 # このファイル(common.make)が置かれているパス
 CURRENT_MAKEDIR_PATH	:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
@@ -43,7 +44,11 @@ CMake = \
 	$(MAKE_GDBINIT_CMD)\
 	$(ADDITIONAL_CMD)
 
-MakeLink = ln -sf $(WORK_DIR)/compile_commands.json ./
+ifdef MAKE_COMPILECOMMANDS_LINK
+	MakeLink := ln -sf $(WORK_DIR)/compile_commands.json ./
+else
+	MakeLink :=
+endif
 
 Make = \
 	cd $(WORK_DIR);\
