@@ -231,11 +231,15 @@ namespace lubee::test {
 	TYPED_TEST(Size, Expand) {
 		USING(value_t);
 		auto& mt = this->mt();
+		const auto makeVal = [&mt](){
+			if constexpr (std::is_integral_v<value_t>) {
+				return mt.template getUniform<std::make_signed_t<value_t>>({-1024, 1024});
+			} else {
+				return mt.template getUniform<value_t>({-1024, 1024});
+			}
+		};
 		// expand(w,h)
 		{
-			const auto makeVal = [&mt](){
-				return mt.template getUniform<value_t>({-1024, 1024});
-			};
 			const auto dw = makeVal(),
 						dh = makeVal();
 			auto tmp = this->s0;
@@ -256,7 +260,7 @@ namespace lubee::test {
 		// expand(s)
 		{
 			// expand(s,s)と同じ結果になる
-			const auto d = mt.template getUniform<value_t>({-1024, 1024});
+			const auto d = makeVal();
 			auto tmp0 = this->s0,
 				 tmp1 = tmp0;
 			const bool b0 = tmp0.expand(d),
