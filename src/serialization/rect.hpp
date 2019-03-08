@@ -1,5 +1,6 @@
 #pragma once
 #include "../rect.hpp"
+#include "../pow_value.hpp"
 #include <cereal/access.hpp>
 
 namespace lubee {
