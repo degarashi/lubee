@@ -125,6 +125,18 @@ namespace lubee {
 			Point<value_t> offset() const {
 				return Point<value_t>(x0, y0);
 			}
+			Point<value_t> topLeft() const {
+				return offset();
+			}
+			Point<value_t> topRight() const {
+				return {x1, y0};
+			}
+			Point<value_t> bottomLeft() const {
+				return {x0, y1};
+			}
+			Point<value_t> bottomRight() const {
+				return {x1, y1};
+			}
 			Size<value_t> size() const {
 				return Size<value_t>(width(), height());
 			}
