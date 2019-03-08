@@ -49,6 +49,25 @@ namespace lubee {
 			Size operator * (const T2& s) const {
 				return Size(width*s, height*s);
 			}
+
+			template <class V>
+			Size& operator += (const Size<V>& s) {
+				return *this = *this + s;
+			}
+			template <class V>
+			Size& operator -= (const Size<V>& s) {
+				return *this = *this - s;
+			}
+			template <class V>
+			Size operator + (const Size<V>& s) const {
+				return Size(width + s.width,
+							height + s.height);
+			}
+			template <class V>
+			Size operator - (const Size<V>& s) const {
+				return Size(width - s.width,
+							height - s.height);
+			}
 			void shiftR(const size_t n) noexcept(ExEq) {
 				// 値のbit幅以上のシフトは0で固定
 				if(n >= sizeof(value_t)*8) {
