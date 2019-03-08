@@ -18,6 +18,12 @@ namespace lubee {
 			}
 		public:
 			using value_t = T;
+			using size_value_t = std::conditional_t<
+									std::is_integral_v<value_t>,
+									std::make_unsigned_t<value_t>,
+									value_t
+								>;
+			using size_type = Size<size_value_t>;
 			union {
 				struct {
 					value_t	x0, x1, y0, y1;
@@ -39,13 +45,13 @@ namespace lubee {
 			{
 				D_Assert0(_checkValidness());
 			}
-			Rect(const value_t& x_0, const value_t& y_0, const Size<T>& size):
+			Rect(const value_t& x_0, const value_t& y_0, const size_type& size):
 				x0(x_0),
 				x1(x_0 + size.width),
 				y0(y_0),
 				y1(y_0 + size.height)
 			{}
-			Rect(const Point<T>& pos, const Size<T>& size):
+			Rect(const Point<T>& pos, const size_type& size):
 				Rect(pos.x, pos.y, size)
 			{}
 			static Rect FromSize(const value_t& x0, const value_t& y0, const value_t& w, const value_t& h) {
@@ -117,7 +123,7 @@ namespace lubee {
 				setWidth(w);
 				setHeight(h);
 			}
-			void setSize(const Size<value_t>& s) {
+			void setSize(const size_type& s) {
 				x1 = x0 + s.width;
 				y1 = y0 + s.height;
 			}
@@ -136,8 +142,8 @@ namespace lubee {
 			Point<value_t> bottomRight() const {
 				return {x1, y1};
 			}
-			Size<value_t> size() const {
-				return Size<value_t>(width(), height());
+			size_type size() const {
+				return {width(), height()};
 			}
 			#define DEF_OP(op) \
 				template <class V> \
@@ -151,10 +157,9 @@ namespace lubee {
 				} \
 				template <class V, ENABLE_IF((HasMethod_x_t<V>{} && HasMethod_y_t<V>{}))> \
 				Rect operator op (const V& v) const { \
-					return *this op Size<value_t>{v.x, v.y}; \
+					return *this op size_type{v.x, v.y}; \
 				} \
-				template <class V> \
-				Rect operator op (const Size<V>& s) const { \
+				Rect operator op (const size_type& s) const { \
 					return {x0 op s.width, x1 op s.width, \
 							y0 op s.height, y1 op s.height}; \
 				}
