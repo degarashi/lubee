@@ -57,11 +57,11 @@ namespace lubee {
 			static Rect FromSize(const value_t& x0, const value_t& y0, const value_t& w, const value_t& h) {
 				return Rect(x0, x0+w, y0, y0+h);
 			}
-			value_t width() const {
+			size_value_t width() const {
 				D_Assert0(_checkValidness());
 				return x1-x0;
 			}
-			value_t height() const {
+			size_value_t height() const {
 				D_Assert0(_checkValidness());
 				return y1-y0;
 			}
@@ -85,7 +85,7 @@ namespace lubee {
 				);
 			}
 			//! 面積
-			value_t area() const {
+			size_value_t area() const {
 				return width() * height();
 			}
 			Rect move(const value_t& dx, const value_t& dy) const {
