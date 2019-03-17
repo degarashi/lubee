@@ -18,11 +18,13 @@ namespace lubee {
 			}
 		public:
 			using value_t = T;
-			using size_value_t = std::conditional_t<
-									std::is_integral_v<value_t>,
-									std::make_unsigned_t<value_t>,
-									value_t
-								>;
+
+			template <class T2, ENABLE_IF(std::is_integral_v<T2>)>
+			static std::make_unsigned_t<T2> MakeUnsigned(T2*);
+			template <class T2, ENABLE_IF(!std::is_integral_v<T2>)>
+			static T2 MakeUnsigned(T2*);
+
+			using size_value_t = decltype(MakeUnsigned(static_cast<value_t*>(nullptr)));
 			using size_type = Size<size_value_t>;
 			union {
 				struct {
