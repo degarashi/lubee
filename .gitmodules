@@ -1,0 +1,3 @@
+[submodule "common_compile"]
+	path = common_compile
+	url = ../common_compile
