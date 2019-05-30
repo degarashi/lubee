@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 project(lubee)
 
 set(COMMON_COMPILE common_compile)
-set(CXX_VERSION 17)
-include(${COMMON_COMPILE}/cxx_options.cmake)
+include(${COMMON_COMPILE}/cxx_setup.cmake)
 include(${COMMON_COMPILE}/compile_commands.cmake)
 include(${COMMON_COMPILE}/aux.cmake)
+SetupCXX(17 CompileCommands)
 string(CONCAT CMAKE_CXX_FLAGS " -Wno-c99-extensions")
 
 if(NOT without-test)
