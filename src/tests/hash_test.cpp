@@ -75,7 +75,7 @@ namespace lubee::test {
 	};
 
 	using Types = ::testing::Types<TestValue_Num, TestValue_String>;
-	TYPED_TEST_CASE(Hash, Types);
+	TYPED_TEST_SUITE(Hash, Types);
 
 	TYPED_TEST(Hash, General) {
 		USING(key_t);

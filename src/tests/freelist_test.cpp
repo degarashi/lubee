@@ -11,7 +11,7 @@ namespace lubee {
 				using fl_t = ::lubee::Freelist<value_t>;
 		};
 		using Types = ::testing::Types<uint32_t, int32_t, uint64_t>;
-		TYPED_TEST_CASE(Freelist, Types);
+		TYPED_TEST_SUITE(Freelist, Types);
 
 		struct Op {
 			enum e {

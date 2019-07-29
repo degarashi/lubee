@@ -156,7 +156,7 @@ namespace lubee {
 		};
 
 		using Types = ::testing::Types<std::tuple<uint32_t, IConst<3>, IConst<9>>>;
-		TYPED_TEST_CASE(Bitfield, Types);
+		TYPED_TEST_SUITE(Bitfield, Types);
 
 		TYPED_TEST(Bitfield, General) {
 			USING(BF);

@@ -32,7 +32,7 @@ namespace lubee {
 			using AK = ::lubee::AssocVecK<K,T2,P>;
 		};
 		using AsvT = ::testing::Types<std::less<>, std::greater<>>;
-		TYPED_TEST_CASE(AssocVec, AsvT);
+		TYPED_TEST_SUITE(AssocVec, AsvT);
 		TYPED_TEST(AssocVec, WithoutKey) {
 			auto& mt = this->mt();
 			TestAssoc<typename TestFixture::template A<int,TypeParam>>(mt);

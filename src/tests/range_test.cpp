@@ -17,7 +17,7 @@ namespace lubee {
 			}
 		};
 		using Types = ::testing::Types<int, double, char>;
-		TYPED_TEST_CASE(Range, Types);
+		TYPED_TEST_SUITE(Range, Types);
 
 		template <class T, class MTF, ENABLE_IF(std::is_floating_point<T>{})>
 		T GenValueNZ(MTF& mtf) {

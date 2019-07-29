@@ -32,7 +32,7 @@ namespace lubee {
 							AObj<32, uint64_t>,
 							AObj<64, uint64_t>
 						>;
-		TYPED_TEST_CASE(AlignedAlloc, Types);
+		TYPED_TEST_SUITE(AlignedAlloc, Types);
 
 		template <class MT, class CBInit, class CBCheck, class CBFree>
 		void Test(MT& mt, const CBInit& cbInit, const CBCheck& cbCheck, const CBFree& cbFree) {

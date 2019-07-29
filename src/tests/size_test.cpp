@@ -48,7 +48,7 @@ namespace lubee::test {
 			std::tuple<SizeF::value_t, SizeF::value_t>
 		>;
 	}
-	TYPED_TEST_CASE(TSize, TTypes);
+	TYPED_TEST_SUITE(TSize, TTypes);
 
 	TYPED_TEST(TSize, Constructor) {
 		USING(Sz);
@@ -121,7 +121,7 @@ namespace lubee::test {
 			SizeF::value_t
 		>;
 	}
-	TYPED_TEST_CASE(Size, Types);
+	TYPED_TEST_SUITE(Size, Types);
 
 	TYPED_TEST(Size, Area) {
 		// area

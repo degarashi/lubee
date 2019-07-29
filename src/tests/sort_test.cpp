@@ -8,7 +8,7 @@ namespace lubee {
 			using value_t = T;
 		};
 		using SortT = ::testing::Types<int, double>;
-		TYPED_TEST_CASE(Sort, SortT);
+		TYPED_TEST_SUITE(Sort, SortT);
 		TYPED_TEST(Sort, Insertion) {
 			auto& mt = this->mt();
 			// 適当にランダム配列を生成

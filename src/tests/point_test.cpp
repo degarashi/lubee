@@ -32,7 +32,7 @@ namespace lubee::test {
 	namespace {
 		using Types = ::testing::Types<PointI::value_t, PointF::value_t>;
 	}
-	TYPED_TEST_CASE(Point, Types);
+	TYPED_TEST_SUITE(Point, Types);
 
 	TYPED_TEST(Point, Constructor) {
 		const auto v0 = this->makeValue(),
