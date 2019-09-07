@@ -167,7 +167,8 @@ namespace lubee {
 		}
 		TYPED_TEST(AlignedAlloc, Allocator) {
 			USING(value_t);
-			using Vec = std::vector<std::pair<value_t, int>, AlignedPool<value_t>>;
+			using Pair = std::pair<value_t, int>;
+			using Vec = std::vector<Pair, AlignedPool<Pair>>;
 			auto& mt = this->mt();
 			Vec v;
 			const int N = mt.template getUniform<int>({1, 64});
